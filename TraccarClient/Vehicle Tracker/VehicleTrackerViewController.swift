@@ -36,7 +36,6 @@ class VehicleTrackerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         databaseHelper = DatabaseHelper()
         
         buffer = userDefaults.bool(forKey: "buffer_preference")
