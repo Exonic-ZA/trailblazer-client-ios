@@ -9,10 +9,11 @@
 import UIKit
 import CoreLocation
 
-class VehicleTrackerViewController: UIViewController {
+class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @IBOutlet weak var connectedLabel: UILabel!
     @IBOutlet weak var sosButton: UIButton!
+    @IBOutlet weak var sosMessage: UILabel!
     @IBOutlet weak var vehicleView: UIView!
     @IBOutlet weak var vehicleReg: UILabel!
     @IBOutlet weak var clockInAndOut: UIButton!
@@ -25,6 +26,7 @@ class VehicleTrackerViewController: UIViewController {
     var online = false
     var waiting = false
     var stopped = false
+    var sendingSOS = false
 
     let positionProvider = PositionProvider()
     var locationManager = CLLocationManager()
@@ -49,6 +51,8 @@ class VehicleTrackerViewController: UIViewController {
     }
     
     func setupView() {
+        sosMessage.text = ""
+        
         connectedLabel.layer.borderWidth = 1.5
         connectedLabel.layer.borderColor = UIColor.darkGray.cgColor
         connectedLabel.backgroundColor = UIColor.lightGray
@@ -66,6 +70,11 @@ class VehicleTrackerViewController: UIViewController {
         clockInAndOut.setImage(UIImage(systemName: "play.fill"), for: .normal)
         
         settingsView.layer.cornerRadius = settingsView.frame.height / 2
+        
+        let sosGesture = UILongPressGestureRecognizer(target: self, action: #selector(sosPressed))
+        sosGesture.minimumPressDuration = 2.0
+        sosGesture.delegate = self
+        self.sosButton.addGestureRecognizer(sosGesture)
     }
 
     @IBAction func clockInOrOut(_ sender: UIButton) {
@@ -81,14 +90,33 @@ class VehicleTrackerViewController: UIViewController {
     }
     
     @IBAction func settingsPressed(_ sender: UIButton) {
+        sosMessage.text = ""
         clockOut()
         performSegue(withIdentifier: "Settings", sender: self)
+    }
+    
+    @IBAction func sosPressed(_ sender: UILongPressGestureRecognizer) {
+        if sender.state == .began {
+            sendingSOS = true
+            let pulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: sosButton.center)
+            pulse.animationDuration = 1.0
+            pulse.backgroundColor = UIColor.red.cgColor
+            self.view.layer.insertSublayer(pulse, below: self.view.layer)
+            clockin()
+        } else if sender.state == .ended {
+            if sendingSOS {
+                sendingSOS = false
+                clockOut()
+                sosMessage.text = viewModel?.sosSent
+            }
+        }
     }
     
     private func clockin() {
         viewModel?.clockIn = true
         online = true
         start()
+        sosMessage.text = ""
         connectedLabel.backgroundColor = UIColor(named: "trailblazer-light-background")
         connectedLabel.layer.borderColor = UIColor(named: "trailblazer-light-green")?.cgColor
         connectedLabel.textColor = UIColor(named: "trailblazer-light-green")
@@ -162,7 +190,12 @@ class VehicleTrackerViewController: UIViewController {
     
     func send(_ position: Position) {
         let deviceID = viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased()
-        let url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, deviceId: deviceID)
+        var url: URL?
+        if sendingSOS {
+            url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, alarm: "SOS", deviceId: deviceID)
+        } else {
+            url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, deviceId: deviceID)
+        }
         print("INFO SENT: \(String(describing: url))")
         if let request = url {
             RequestManager.sendRequest(request, completionHandler: {(_ success: Bool) -> Void in
