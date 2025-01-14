@@ -103,10 +103,11 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
             pulse.backgroundColor = UIColor.red.cgColor
             self.view.layer.insertSublayer(pulse, below: self.view.layer)
             clockin()
+            connectedLabel.text = viewModel?.sosStatus
         } else if sender.state == .ended {
             if sendingSOS {
                 sendingSOS = false
-                clockOut()
+                connectedLabel.text = viewModel?.connectionText
                 sosMessage.text = viewModel?.sosSent
             }
         }

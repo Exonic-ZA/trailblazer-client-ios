@@ -18,6 +18,7 @@ struct VehicleTrackerViewModel {
         clockIn ? " Clock out" : " Clock in"
     }
     
+    var sosStatus = "● Sending SOS"
     var sosSent = "SOS Sent"
     
     var deviceIdentifier: String? {
