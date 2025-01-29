@@ -17,6 +17,10 @@
 		5EE3CA362998948F002C86E4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5EE3CA352998948F002C86E4 /* FirebaseCrashlytics */; };
 		5EE3CA39299894B9002C86E4 /* InAppSettingsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5EE3CA38299894B9002C86E4 /* InAppSettingsKit */; };
 		73D06D7B2CE3513000357CF2 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D06D7A2CE3513000357CF2 /* SettingsViewController.swift */; };
+		935B831C2D42E8E40087E444 /* TraccarClient copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 935B831B2D42E8E30087E444 /* TraccarClient copy-Info.plist */; };
+		935B831E2D4346C60087E444 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B831D2D4346C60087E444 /* Enums.swift */; };
+		935B83202D434BA30087E444 /* TrailblazerNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */; };
+		935B83222D434CAA0087E444 /* TrailblazerPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */; };
 		937274E92D2BCF4F002BA7AE /* PulseAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937274E82D2BCF4F002BA7AE /* PulseAnimation.swift */; };
 		93F0C4C32CE23FAC00A7D92D /* VehicleTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F0C4C22CE23FAC00A7D92D /* VehicleTrackerViewController.swift */; };
 		93F0C4C52CE24E1700A7D92D /* VehicleTrackerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F0C4C42CE24E1700A7D92D /* VehicleTrackerViewModel.swift */; };
@@ -75,8 +79,11 @@
 		5E716A2A1F63A60800A2DBC3 /* ProtocolFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtocolFormatter.swift; sourceTree = "<group>"; };
 		5E716A2D1F63A7A200A2DBC3 /* ProtocolFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtocolFormatterTests.swift; sourceTree = "<group>"; };
 		5E716A2F1F63A9F600A2DBC3 /* RequestManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManagerTests.swift; sourceTree = "<group>"; };
-		734D17122CEE1188000F4813 /* TraccarClient copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "TraccarClient copy-Info.plist"; path = "/Users/balleng/Documents/Developer/trailblazer-client-ios/TraccarClient copy-Info.plist"; sourceTree = "<absolute>"; };
 		73D06D7A2CE3513000357CF2 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		935B831B2D42E8E30087E444 /* TraccarClient copy-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TraccarClient copy-Info.plist"; sourceTree = "<group>"; };
+		935B831D2D4346C60087E444 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailblazerNetworkManager.swift; sourceTree = "<group>"; };
+		935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailblazerPhoto.swift; sourceTree = "<group>"; };
 		937274E82D2BCF4F002BA7AE /* PulseAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseAnimation.swift; sourceTree = "<group>"; };
 		93DBFD932D25BE2700E7F7A1 /* locations.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = locations.gpx; sourceTree = "<group>"; };
 		93F0C4C22CE23FAC00A7D92D /* VehicleTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleTrackerViewController.swift; sourceTree = "<group>"; };
@@ -178,6 +185,9 @@
 				93F0C4C22CE23FAC00A7D92D /* VehicleTrackerViewController.swift */,
 				93F0C4C42CE24E1700A7D92D /* VehicleTrackerViewModel.swift */,
 				937274E82D2BCF4F002BA7AE /* PulseAnimation.swift */,
+				935B831D2D4346C60087E444 /* Enums.swift */,
+				935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */,
+				935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */,
 			);
 			path = "Vehicle Tracker";
 			sourceTree = "<group>";
@@ -185,11 +195,11 @@
 		CED4870F17DB1BF6007FCF57 = {
 			isa = PBXGroup;
 			children = (
+				935B831B2D42E8E30087E444 /* TraccarClient copy-Info.plist */,
 				93DBFD932D25BE2700E7F7A1 /* locations.gpx */,
 				CED4872117DB1BF6007FCF57 /* TraccarClient */,
 				CEE286CF1B80839700AE7E83 /* TraccarClientTests */,
 				CED4871A17DB1BF6007FCF57 /* Frameworks */,
-				734D17122CEE1188000F4813 /* TraccarClient copy-Info.plist */,
 				CED4871917DB1BF6007FCF57 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -383,6 +393,7 @@
 				CEF6433D1B91AA9400195CEA /* Localizable.strings in Resources */,
 				CE5899C81B115C9100ED70D2 /* Images.xcassets in Resources */,
 				CEF643271B919FFA00195CEA /* LaunchScreen.xib in Resources */,
+				935B831C2D42E8E40087E444 /* TraccarClient copy-Info.plist in Resources */,
 				CED4879B17DB1E61007FCF57 /* InAppSettings.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -426,6 +437,7 @@
 				CB7ED0841F662BAF00A33FCF /* AppDelegate.swift in Sources */,
 				5E394EBE28A9CC7600396F33 /* BatteryStatus.swift in Sources */,
 				5E716A2B1F63A60800A2DBC3 /* ProtocolFormatter.swift in Sources */,
+				935B83222D434CAA0087E444 /* TrailblazerPhoto.swift in Sources */,
 				73D06D7B2CE3513000357CF2 /* SettingsViewController.swift in Sources */,
 				CBCE82F21B8D265800A7318B /* TraccarClient.xcdatamodeld in Sources */,
 				93F0C4C32CE23FAC00A7D92D /* VehicleTrackerViewController.swift in Sources */,
@@ -435,7 +447,9 @@
 				93F0C4C52CE24E1700A7D92D /* VehicleTrackerViewModel.swift in Sources */,
 				5E716A291F63A45A00A2DBC3 /* RequestManager.swift in Sources */,
 				CB4197931F674A3E008F301C /* DatabaseHelper.swift in Sources */,
+				935B831E2D4346C60087E444 /* Enums.swift in Sources */,
 				937274E92D2BCF4F002BA7AE /* PulseAnimation.swift in Sources */,
+				935B83202D434BA30087E444 /* TrailblazerNetworkManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

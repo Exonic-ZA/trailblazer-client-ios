@@ -32,4 +32,5 @@ struct VehicleTrackerViewModel {
     var locationAccuracy: String? {
         UserDefaults.standard.string(forKey: "accuracy_preference")
     }
+    
 }

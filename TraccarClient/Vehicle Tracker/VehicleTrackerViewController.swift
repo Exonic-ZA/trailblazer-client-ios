@@ -9,7 +9,7 @@
 import UIKit
 import CoreLocation
 
-class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegate {
+class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var connectedLabel: UILabel!
     @IBOutlet weak var sosButton: UIButton!
@@ -19,9 +19,11 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     @IBOutlet weak var clockInAndOut: UIButton!
     @IBOutlet weak var settingsView: UIView!
     @IBOutlet weak var settings: UIButton!
+    @IBOutlet weak var takePhoto: UIButton!
     
     var viewModel: VehicleTrackerViewModel?
     var settingsViewController = SettingsViewController()
+    var imagePicker: UIImagePickerController!
     
     var online = false
     var waiting = false
@@ -33,6 +35,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     var databaseHelper: DatabaseHelper?
     let networkManager = NetworkManager()
     let userDefaults = UserDefaults.standard
+    let trailblazerNetworkManager = TrailblazerNetworkManager()
     
     var buffer = false
     
@@ -46,6 +49,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         positionProvider.delegate = self
         locationManager.delegate = self
         networkManager.delegate = self
+        trailblazerNetworkManager.delegate = self
         
         setupView()
     }
@@ -70,6 +74,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         clockInAndOut.setImage(UIImage(systemName: "play.fill"), for: .normal)
         
         settingsView.layer.cornerRadius = settingsView.frame.height / 2
+        takePhoto.layer.cornerRadius = takePhoto.frame.height / 2
         
         let sosGesture = UILongPressGestureRecognizer(target: self, action: #selector(sosPressed))
         sosGesture.minimumPressDuration = 2.0
@@ -96,21 +101,33 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     }
     
     @IBAction func sosPressed(_ sender: UILongPressGestureRecognizer) {
-        if sender.state == .began {
-            sendingSOS = true
-            let pulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: sosButton.center)
-            pulse.animationDuration = 1.0
-            pulse.backgroundColor = UIColor.red.cgColor
-            self.view.layer.insertSublayer(pulse, below: self.view.layer)
-            clockin()
-            connectedLabel.text = viewModel?.sosStatus
-        } else if sender.state == .ended {
-            if sendingSOS {
-                sendingSOS = false
-                connectedLabel.text = viewModel?.connectionText
-                sosMessage.text = viewModel?.sosSent
+        if viewModel?.deviceIdentifier != "" {
+            if sender.state == .began {
+                sendingSOS = true
+                let pulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: sosButton.center)
+                pulse.animationDuration = 1.0
+                pulse.backgroundColor = UIColor.red.cgColor
+                self.view.layer.insertSublayer(pulse, below: self.view.layer)
+                clockin()
+                connectedLabel.text = viewModel?.sosStatus
+            } else if sender.state == .ended {
+                if sendingSOS {
+                    sendingSOS = false
+                    connectedLabel.text = viewModel?.connectionText
+                    sosMessage.text = viewModel?.sosSent
+                }
             }
+        } else {
+            performSegue(withIdentifier: "Settings", sender: self)
         }
+    }
+    
+    @IBAction func takePhotoPressed(_ sender: UIButton) {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            selectImageFrom(.photoLibrary)
+            return
+        }
+        selectImageFrom(.camera)
     }
     
     private func clockin() {
@@ -153,6 +170,18 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         locationManager.stopMonitoringSignificantLocationChanges()
         positionProvider.stopUpdates()
         self.stopped = true
+    }
+    
+    func selectImageFrom(_ source: Enums.ImageSource){
+        imagePicker = UIImagePickerController()
+        imagePicker?.delegate = self
+        switch source {
+        case .camera:
+            imagePicker.sourceType = .camera
+        case .photoLibrary:
+            imagePicker.sourceType = .photoLibrary
+        }
+        present(imagePicker, animated: true)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -229,7 +258,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     }
 }
 
-extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelegate, NetworkManagerDelegate, CLLocationManagerDelegate {
+extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelegate, NetworkManagerDelegate, TrailblazerNetworkManagerDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate {
     func updateIdentifier() {
         vehicleReg.text = viewModel?.deviceIdentifier
     }
@@ -249,5 +278,26 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
             read()
         }
         self.online = online
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
+
+        guard let image = info[.originalImage] as? UIImage else {
+            print("No image found")
+            return
+        }
+
+        // print out the image size as a test
+        print(image.size)
+        let photoInfo = TrailblazerPhoto(image: image.pngData()!)
+        
+        sendPhoto(photoInfo)
+    }
+    
+    func sendPhoto(_ photoInfo: TrailblazerPhoto) {
+        trailblazerNetworkManager.sendPhoto(photoInfo) { result in
+            print(result)
+        }
     }
 }
