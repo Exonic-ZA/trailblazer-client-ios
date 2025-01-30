@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		5EE3CA342998948F002C86E4 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5EE3CA332998948F002C86E4 /* FirebaseAnalytics */; };
 		5EE3CA362998948F002C86E4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5EE3CA352998948F002C86E4 /* FirebaseCrashlytics */; };
 		5EE3CA39299894B9002C86E4 /* InAppSettingsKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5EE3CA38299894B9002C86E4 /* InAppSettingsKit */; };
+		7338360F2D4BABD8004CB4E7 /* TrailblazerMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7338360E2D4BABBB004CB4E7 /* TrailblazerMetadata.swift */; };
 		73D06D7B2CE3513000357CF2 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D06D7A2CE3513000357CF2 /* SettingsViewController.swift */; };
 		935B831C2D42E8E40087E444 /* TraccarClient copy-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 935B831B2D42E8E30087E444 /* TraccarClient copy-Info.plist */; };
 		935B831E2D4346C60087E444 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B831D2D4346C60087E444 /* Enums.swift */; };
@@ -79,6 +80,7 @@
 		5E716A2A1F63A60800A2DBC3 /* ProtocolFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtocolFormatter.swift; sourceTree = "<group>"; };
 		5E716A2D1F63A7A200A2DBC3 /* ProtocolFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtocolFormatterTests.swift; sourceTree = "<group>"; };
 		5E716A2F1F63A9F600A2DBC3 /* RequestManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManagerTests.swift; sourceTree = "<group>"; };
+		7338360E2D4BABBB004CB4E7 /* TrailblazerMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailblazerMetadata.swift; sourceTree = "<group>"; };
 		73D06D7A2CE3513000357CF2 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		935B831B2D42E8E30087E444 /* TraccarClient copy-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "TraccarClient copy-Info.plist"; sourceTree = "<group>"; };
 		935B831D2D4346C60087E444 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 		73D06D792CE350E100357CF2 /* Vehicle Tracker */ = {
 			isa = PBXGroup;
 			children = (
+				7338360E2D4BABBB004CB4E7 /* TrailblazerMetadata.swift */,
 				93F0C4C22CE23FAC00A7D92D /* VehicleTrackerViewController.swift */,
 				93F0C4C42CE24E1700A7D92D /* VehicleTrackerViewModel.swift */,
 				937274E82D2BCF4F002BA7AE /* PulseAnimation.swift */,
@@ -432,6 +435,7 @@
 			files = (
 				CB7ED0801F6602CD00A33FCF /* Position.swift in Sources */,
 				CBAA0F7F1F68E807008BBBBE /* MainViewController.swift in Sources */,
+				7338360F2D4BABD8004CB4E7 /* TrailblazerMetadata.swift in Sources */,
 				CB7ED0821F661B4F00A33FCF /* PositionProvider.swift in Sources */,
 				CB4197991F67724F008F301C /* NetworkManager.swift in Sources */,
 				CB7ED0841F662BAF00A33FCF /* AppDelegate.swift in Sources */,
@@ -582,7 +586,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TraccarClient/TraccarClient-Prefix.pch";
 				INFOPLIST_FILE = "TraccarClient/TraccarClient-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Trailblazer Pioneer - Client";
+				INFOPLIST_KEY_CFBundleDisplayName = Trailblazer;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -753,7 +757,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TraccarClient/TraccarClient-Prefix.pch";
 				INFOPLIST_FILE = "TraccarClient/TraccarClient-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Trailblazer Pioneer - Client";
+				INFOPLIST_KEY_CFBundleDisplayName = Trailblazer;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -787,7 +791,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TraccarClient/TraccarClient-Prefix.pch";
 				INFOPLIST_FILE = "TraccarClient/TraccarClient-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Trailblazer Pioneer - Client";
+				INFOPLIST_KEY_CFBundleDisplayName = Trailblazer;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

@@ -20,10 +20,12 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     @IBOutlet weak var settingsView: UIView!
     @IBOutlet weak var settings: UIButton!
     @IBOutlet weak var takePhoto: UIButton!
+    @IBOutlet weak var uploadLabel: UILabel!
     
     var viewModel: VehicleTrackerViewModel?
     var settingsViewController = SettingsViewController()
     var imagePicker: UIImagePickerController!
+    var photoLocation = CLLocationManager()
     
     var online = false
     var waiting = false
@@ -50,12 +52,14 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         locationManager.delegate = self
         networkManager.delegate = self
         trailblazerNetworkManager.delegate = self
+        photoLocation.delegate = self
         
         setupView()
     }
     
     func setupView() {
         sosMessage.text = ""
+        uploadLabel.text = ""
         
         connectedLabel.layer.borderWidth = 1.5
         connectedLabel.layer.borderColor = UIColor.darkGray.cgColor
@@ -80,6 +84,10 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         sosGesture.minimumPressDuration = 2.0
         sosGesture.delegate = self
         self.sosButton.addGestureRecognizer(sosGesture)
+
+        photoLocation.desiredAccuracy = kCLLocationAccuracyBest
+        photoLocation.requestAlwaysAuthorization()
+        photoLocation.startUpdatingLocation()
     }
 
     @IBAction func clockInOrOut(_ sender: UIButton) {
@@ -96,7 +104,6 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     
     @IBAction func settingsPressed(_ sender: UIButton) {
         sosMessage.text = ""
-        clockOut()
         performSegue(withIdentifier: "Settings", sender: self)
     }
     
@@ -108,14 +115,14 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
                 pulse.animationDuration = 1.0
                 pulse.backgroundColor = UIColor.red.cgColor
                 self.view.layer.insertSublayer(pulse, below: self.view.layer)
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.warning)
+                
                 clockin()
                 connectedLabel.text = viewModel?.sosStatus
             } else if sender.state == .ended {
-                if sendingSOS {
-                    sendingSOS = false
-                    connectedLabel.text = viewModel?.connectionText
-                    sosMessage.text = viewModel?.sosSent
-                }
+                connectedLabel.text = viewModel?.connectionText
+                sosMessage.text = viewModel?.sosSent
             }
         } else {
             performSegue(withIdentifier: "Settings", sender: self)
@@ -135,6 +142,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         online = true
         start()
         sosMessage.text = ""
+        uploadLabel.text = ""
         connectedLabel.backgroundColor = UIColor(named: "trailblazer-light-background")
         connectedLabel.layer.borderColor = UIColor(named: "trailblazer-light-green")?.cgColor
         connectedLabel.textColor = UIColor(named: "trailblazer-light-green")
@@ -146,6 +154,8 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     private func clockOut() {
         viewModel?.clockIn = false
         online = false
+        sendingSOS = false
+        uploadLabel.text = ""
         stop()
         connectedLabel.layer.borderColor = UIColor.darkGray.cgColor
         connectedLabel.backgroundColor = UIColor.lightGray
@@ -259,6 +269,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
 }
 
 extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelegate, NetworkManagerDelegate, TrailblazerNetworkManagerDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate {
+ 
     func updateIdentifier() {
         vehicleReg.text = viewModel?.deviceIdentifier
     }
@@ -280,6 +291,11 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
         self.online = online
     }
     
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let locValue:CLLocationCoordinate2D = manager.location!.coordinate
+        print("locations = \(locValue.latitude) \(locValue.longitude)")
+    }
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
 
@@ -290,14 +306,36 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
 
         // print out the image size as a test
         print(image.size)
-        let photoInfo = TrailblazerPhoto(image: image.pngData()!)
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            return
+        }
         
-        sendPhoto(photoInfo)
+        let photoInfo = TrailblazerPhoto(imageData,
+                                         fileName: viewModel?.deviceIdentifier ?? "",
+                                         fileExtension: "jpg",
+                                         deviceId: viewModel?.deviceIdentifier ?? "",
+                                         longitude: photoLocation.location?.coordinate.longitude ?? 0.0,
+                                         latitude: photoLocation.location?.coordinate.latitude ?? 0.0)
+        
+        sendPhoto(photoInfo, image: image)
     }
     
-    func sendPhoto(_ photoInfo: TrailblazerPhoto) {
-        trailblazerNetworkManager.sendPhoto(photoInfo) { result in
-            print(result)
+    func sendPhoto(_ photoInfo: TrailblazerPhoto, image: UIImage) {
+
+        trailblazerNetworkManager.createMetadata(photoInfo) { metaResult in
+            let result = TrailblazerMetadata(id: metaResult.id,
+                                             fileName: metaResult.fileName,
+                                             fileExtension: metaResult.fileExtension,
+                                             uploadedAt: metaResult.uploadedAt,
+                                             deviceId: metaResult.deviceId,
+                                             latitude: metaResult.latitude,
+                                             longitude: metaResult.longitude)
+            self.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
+                DispatchQueue.main.async() {
+                    self?.uploadLabel.text = "Upload Successful"
+                }
+                print(photoResult)
+            }
         }
     }
 }

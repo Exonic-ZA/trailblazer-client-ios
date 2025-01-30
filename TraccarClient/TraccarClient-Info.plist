@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Trailblazer Pioneer - Client</string>
+	<string>Trailblazer</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
@@ -37,6 +37,8 @@
 	<string>This is a tracking application and therefore requires access to location services</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
+	<key>Password</key>
+	<string>Babbling+Stomp+Bottling8+Payroll</string>
 	<key>UIApplicationShortcutItems</key>
 	<array>
 		<dict>
@@ -89,5 +91,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>Username</key>
+	<string>system@trailblazer.internal</string>
 </dict>
 </plist>

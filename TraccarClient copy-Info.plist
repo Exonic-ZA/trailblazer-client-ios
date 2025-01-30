@@ -95,5 +95,7 @@
 	<string>Please allow access to save photo in your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>You can select photos to send to server.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>login user for uploads</string>
 </dict>
 </plist>
