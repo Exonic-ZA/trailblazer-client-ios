@@ -31,12 +31,18 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app will use camera.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Please allow access to save photo in your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>You can select photos to send to server.</string>
 	<key>Password</key>
 	<string>Babbling+Stomp+Bottling8+Payroll</string>
 	<key>UIApplicationShortcutItems</key>
