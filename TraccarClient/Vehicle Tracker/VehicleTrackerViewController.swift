@@ -324,7 +324,8 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
     }
     
     func sendPhoto(_ photoInfo: TrailblazerPhoto, image: UIImage) {
-
+        self.uploadLabel.text = "Uploading image"
+        
         trailblazerNetworkManager.retrieveDeviceId((viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased())!) { [weak self] result in
             if let error = result.error {
                 DispatchQueue.main.async() {
