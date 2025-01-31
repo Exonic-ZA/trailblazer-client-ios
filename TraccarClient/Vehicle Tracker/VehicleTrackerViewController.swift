@@ -21,6 +21,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     @IBOutlet weak var settings: UIButton!
     @IBOutlet weak var takePhoto: UIButton!
     @IBOutlet weak var uploadLabel: UILabel!
+    @IBOutlet weak var activityLoader: UIActivityIndicatorView!
     
     var viewModel: VehicleTrackerViewModel?
     var settingsViewController = SettingsViewController()
@@ -308,13 +309,11 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
             return
         }
 
-        // print out the image size as a test
-        print(image.size)
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            return
-        }
+        self.activityLoader.startAnimating()
+        let resizedImage = reduceImage(image)
+        let imageData = NSData(data: resizedImage.jpegData(compressionQuality: 1.0)!)
         
-        let photoInfo = TrailblazerPhoto(imageData,
+        let photoInfo = TrailblazerPhoto(imageData as Data,
                                          fileName: viewModel?.deviceIdentifier ?? "",
                                          fileExtension: "jpg",
                                          deviceId: viewModel?.deviceIdentifier ?? "",
@@ -326,22 +325,59 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
     
     func sendPhoto(_ photoInfo: TrailblazerPhoto, image: UIImage) {
 
-        trailblazerNetworkManager.retrieveDeviceId((viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased())!) { [weak self] deviceId in
-            self?.trailblazerNetworkManager.createMetadata(photoInfo, deviceId: deviceId.id) { metaResult in
-                let result = TrailblazerMetadata(id: metaResult.id,
-                                                 fileName: metaResult.fileName,
-                                                 fileExtension: metaResult.fileExtension,
-                                                 uploadedAt: metaResult.uploadedAt,
-                                                 deviceId: metaResult.deviceId,
-                                                 latitude: metaResult.latitude,
-                                                 longitude: metaResult.longitude)
-                self?.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
-                    DispatchQueue.main.async() {
-                        self?.uploadLabel.text = "Upload Successful"
+        trailblazerNetworkManager.retrieveDeviceId((viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased())!) { [weak self] result in
+            if let error = result.error {
+                DispatchQueue.main.async() {
+                    self?.uploadLabel.text = error.localizedDescription
+                    self?.activityLoader.stopAnimating()
+                }
+            } else {
+                let deviceId = result.deviceId?.id ?? 0
+                self?.trailblazerNetworkManager.createMetadata(photoInfo, deviceId: deviceId) { metaResult in
+                    let result = TrailblazerMetadata(id: metaResult.id,
+                                                     fileName: metaResult.fileName,
+                                                     fileExtension: metaResult.fileExtension,
+                                                     uploadedAt: metaResult.uploadedAt,
+                                                     deviceId: metaResult.deviceId,
+                                                     latitude: metaResult.latitude,
+                                                     longitude: metaResult.longitude)
+                    self?.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
+                        DispatchQueue.main.async() {
+                            self?.uploadLabel.text = "Upload Successful"
+                            self?.activityLoader.stopAnimating()
+                        }
+                        print(photoResult)
                     }
-                    print(photoResult)
                 }
             }
         }
+    }
+    
+    func reduceImage(_ image: UIImage) -> UIImage {
+        var imgData = NSData(data: image.jpegData(compressionQuality: 1)!)
+        var imageSize: Int = imgData.count
+        var resizedImage = image
+        while imageSize > 10000 {
+            resizedImage = resizedImage.resizeWithPercent(percentage: 0.5)!
+            imgData = NSData(data: resizedImage.jpegData(compressionQuality: 1.0)!)
+            imageSize = imgData.count
+            print("actual size of image in KB: %f ", Double(imageSize) / 1000.0)
+        }
+        
+        return resizedImage
+    }
+}
+
+extension UIImage {
+    func resizeWithPercent(percentage: CGFloat) -> UIImage? {
+        let imageView = UIImageView(frame: CGRect(origin: .zero, size: CGSize(width: size.width * percentage, height: size.height * percentage)))
+        imageView.contentMode = .scaleAspectFit
+        imageView.image = self
+        UIGraphicsBeginImageContextWithOptions(imageView.bounds.size, false, scale)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        imageView.layer.render(in: context)
+        guard let result = UIGraphicsGetImageFromCurrentImageContext() else { return nil }
+        UIGraphicsEndImageContext()
+        return result
     }
 }

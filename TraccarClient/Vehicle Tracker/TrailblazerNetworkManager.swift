@@ -34,7 +34,7 @@ class TrailblazerNetworkManager: NSObject {
         password = Bundle.main.object(forInfoDictionaryKey: "Password") as? String ?? ""
     }
     
-    func retrieveDeviceId(_ deviceId: String, completion: @escaping(TrailblazerDeviceId) -> Void) {
+    func retrieveDeviceId(_ deviceId: String, completion: @escaping(DeviceIdResult) -> Void) {
         let loginString = "\(self.username):\(self.password)"
         let loginData = loginString.data(using: .utf8)!
         let base64LoginString = loginData.base64EncodedString()
@@ -67,7 +67,7 @@ class TrailblazerNetworkManager: NSObject {
             let decoder = JSONDecoder()
             do {
                 let jsonData = try decoder.decode([TrailblazerDeviceId].self, from: data!)
-                completion(jsonData[0])
+                completion(DeviceIdResult(deviceId: jsonData[0], error: nil))
             } catch {
                 print("❌ JSON Decoding Error: \(error)")
             }
@@ -170,4 +170,9 @@ class TrailblazerNetworkManager: NSObject {
         dataTask.resume()
     }
     
+}
+
+struct DeviceIdResult {
+    let deviceId: TrailblazerDeviceId?
+    let error: Error?
 }
