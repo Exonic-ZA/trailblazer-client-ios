@@ -130,11 +130,15 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     }
     
     @IBAction func takePhotoPressed(_ sender: UIButton) {
-        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
-            selectImageFrom(.photoLibrary)
-            return
+        if viewModel?.deviceIdentifier != "" {
+            guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+                selectImageFrom(.photoLibrary)
+                return
+            }
+            selectImageFrom(.camera)
+        } else {
+            performSegue(withIdentifier: "Settings", sender: self)
         }
-        selectImageFrom(.camera)
     }
     
     private func clockin() {
@@ -232,7 +236,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         let deviceID = viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased()
         var url: URL?
         if sendingSOS {
-            url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, alarm: "SOS", deviceId: deviceID)
+            url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, alarm: "sos", deviceId: deviceID)
         } else {
             url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, deviceId: deviceID)
         }
@@ -322,19 +326,21 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
     
     func sendPhoto(_ photoInfo: TrailblazerPhoto, image: UIImage) {
 
-        trailblazerNetworkManager.createMetadata(photoInfo) { metaResult in
-            let result = TrailblazerMetadata(id: metaResult.id,
-                                             fileName: metaResult.fileName,
-                                             fileExtension: metaResult.fileExtension,
-                                             uploadedAt: metaResult.uploadedAt,
-                                             deviceId: metaResult.deviceId,
-                                             latitude: metaResult.latitude,
-                                             longitude: metaResult.longitude)
-            self.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
-                DispatchQueue.main.async() {
-                    self?.uploadLabel.text = "Upload Successful"
+        trailblazerNetworkManager.retrieveDeviceId((viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased())!) { [weak self] deviceId in
+            self?.trailblazerNetworkManager.createMetadata(photoInfo, deviceId: deviceId.id) { metaResult in
+                let result = TrailblazerMetadata(id: metaResult.id,
+                                                 fileName: metaResult.fileName,
+                                                 fileExtension: metaResult.fileExtension,
+                                                 uploadedAt: metaResult.uploadedAt,
+                                                 deviceId: metaResult.deviceId,
+                                                 latitude: metaResult.latitude,
+                                                 longitude: metaResult.longitude)
+                self?.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
+                    DispatchQueue.main.async() {
+                        self?.uploadLabel.text = "Upload Successful"
+                    }
+                    print(photoResult)
                 }
-                print(photoResult)
             }
         }
     }

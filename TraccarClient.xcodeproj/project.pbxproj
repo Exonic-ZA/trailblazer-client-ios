@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,6 +23,7 @@
 		935B83202D434BA30087E444 /* TrailblazerNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */; };
 		935B83222D434CAA0087E444 /* TrailblazerPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */; };
 		937274E92D2BCF4F002BA7AE /* PulseAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937274E82D2BCF4F002BA7AE /* PulseAnimation.swift */; };
+		937966EC2D4CCAD200D65EB2 /* TrailblazerDeviceId.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937966EB2D4CCAD100D65EB2 /* TrailblazerDeviceId.swift */; };
 		93F0C4C32CE23FAC00A7D92D /* VehicleTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F0C4C22CE23FAC00A7D92D /* VehicleTrackerViewController.swift */; };
 		93F0C4C52CE24E1700A7D92D /* VehicleTrackerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F0C4C42CE24E1700A7D92D /* VehicleTrackerViewModel.swift */; };
 		CB4197931F674A3E008F301C /* DatabaseHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4197921F674A3E008F301C /* DatabaseHelper.swift */; };
@@ -87,6 +88,7 @@
 		935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailblazerNetworkManager.swift; sourceTree = "<group>"; };
 		935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailblazerPhoto.swift; sourceTree = "<group>"; };
 		937274E82D2BCF4F002BA7AE /* PulseAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseAnimation.swift; sourceTree = "<group>"; };
+		937966EB2D4CCAD100D65EB2 /* TrailblazerDeviceId.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailblazerDeviceId.swift; sourceTree = "<group>"; };
 		93DBFD932D25BE2700E7F7A1 /* locations.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = locations.gpx; sourceTree = "<group>"; };
 		93F0C4C22CE23FAC00A7D92D /* VehicleTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleTrackerViewController.swift; sourceTree = "<group>"; };
 		93F0C4C42CE24E1700A7D92D /* VehicleTrackerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleTrackerViewModel.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				935B831D2D4346C60087E444 /* Enums.swift */,
 				935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */,
 				935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */,
+				937966EB2D4CCAD100D65EB2 /* TrailblazerDeviceId.swift */,
 			);
 			path = "Vehicle Tracker";
 			sourceTree = "<group>";
@@ -454,6 +457,7 @@
 				935B831E2D4346C60087E444 /* Enums.swift in Sources */,
 				937274E92D2BCF4F002BA7AE /* PulseAnimation.swift in Sources */,
 				935B83202D434BA30087E444 /* TrailblazerNetworkManager.swift in Sources */,
+				937966EC2D4CCAD200D65EB2 /* TrailblazerDeviceId.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
