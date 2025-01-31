@@ -360,22 +360,28 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
         var resizedImage = image
         var compressionQuality: CGFloat = 1.0
 
-        while imageSize > 10_000_000 { // 10MB
-            if compressionQuality > 0.2 {
-                compressionQuality -= 0.1 // Reduce quality first
-            } else {
-                resizedImage = resizedImage.resizeWithPercent(percentage: 0.8)! // Then resize
+        if imageSize > 10_000_000 {
+            while imageSize > 10_000_000 { // 10MB
+                if compressionQuality > 0.2 {
+                    compressionQuality -= 0.1 // Reduce quality first
+                } else {
+                    resizedImage = resizedImage.resizeWithPercent(percentage: 0.8)! // Then resize
+                }
+                
+                imgData = NSData(data: resizedImage.jpegData(compressionQuality: compressionQuality)!)
+                imageSize = imgData.count
+                
+                let sizeKB = Double(imageSize) / 1000.0
+                DispatchQueue.main.async {
+                    self.uploadLabel.text = "Actual size of image in KB: \(sizeKB)"
+                }
+                
+                if imageSize <= 10_000_000 { break } // Exit loop once it's below 10MB
             }
-            
-            imgData = NSData(data: resizedImage.jpegData(compressionQuality: compressionQuality)!)
-            imageSize = imgData.count
-
-            let sizeKB = Double(imageSize) / 1000.0
+        } else {
             DispatchQueue.main.async {
-                self.uploadLabel.text = "Actual size of image in KB: \(sizeKB)"
+                self.uploadLabel.text = "Size is less than 10MB"
             }
-
-            if imageSize <= 10_000_000 { break } // Exit loop once it's below 10MB
         }
 
         return resizedImage
