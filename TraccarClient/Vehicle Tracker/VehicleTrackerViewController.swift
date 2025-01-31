@@ -359,7 +359,7 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
         var imageSize: Int = imgData.count
         var resizedImage = image
         while imageSize > 10000 {
-            resizedImage = resizedImage.resizeWithPercent(percentage: 0.5)!
+            resizedImage = resizedImage.resizeWithPercent(percentage: 0.2)!
             imgData = NSData(data: resizedImage.jpegData(compressionQuality: 1.0)!)
             imageSize = imgData.count
             let size = Double(imageSize) / 1000.0
