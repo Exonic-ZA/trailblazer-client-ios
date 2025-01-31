@@ -361,7 +361,9 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
             resizedImage = resizedImage.resizeWithPercent(percentage: 0.5)!
             imgData = NSData(data: resizedImage.jpegData(compressionQuality: 1.0)!)
             imageSize = imgData.count
-            print("actual size of image in KB: %f ", Double(imageSize) / 1000.0)
+            let size = Double(imageSize) / 1000.0
+            self.uploadLabel.text = "actual size of image in KB: \(size)"
+            print("actual size of image in KB: \(size)")
         }
         
         return resizedImage
