@@ -381,6 +381,7 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
         } else {
             DispatchQueue.main.async {
                 self.uploadLabel.text = "Size is less than 10MB"
+                resizedImage = resizedImage.resizeWithPercent(percentage: 0.1)!
             }
         }
 
