@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
     var trackingController: TrackingController?
     var positionProvider: PositionProvider?
     
-    static var instance: AppDelegate {
+    static var instance: AppDelegate {	
         return UIApplication.shared.delegate as! AppDelegate
     }
     
@@ -42,11 +42,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
         UIDevice.current.isBatteryMonitoringEnabled = true
 
         let userDefaults = UserDefaults.standard
-        if userDefaults.string(forKey: "device_id_preference") == nil {
-            let identifier = "\(Int.random(in: 100000..<1000000))"
-            userDefaults.setValue(identifier, forKey: "device_id_preference")
-        }
-
+        
         registerDefaultsFromSettingsBundle()
         
         migrateLegacyDefaults()

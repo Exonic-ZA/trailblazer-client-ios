@@ -23,7 +23,7 @@ class MainViewController: IASKAppSettingsViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = NSLocalizedString("Traccar Client", comment: "")
+        title = NSLocalizedString("Trailblazer Pioneer - Client", comment: "")
         showCreditsFooter = false
         neverShowPrivacySettings = true
     }

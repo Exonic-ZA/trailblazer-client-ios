@@ -37,7 +37,7 @@ class PositionProvider: NSObject, CLLocationManagerDelegate {
     
     override init() {
         let userDefaults = UserDefaults.standard
-        deviceId = userDefaults.string(forKey: "device_id_preference")!
+        deviceId = userDefaults.string(forKey: "device_id_preference") ?? ""
         interval = userDefaults.double(forKey: "frequency_preference")
         distance = userDefaults.double(forKey: "distance_preference")
         angle = userDefaults.double(forKey: "angle_preference")
@@ -50,7 +50,7 @@ class PositionProvider: NSObject, CLLocationManagerDelegate {
 
         locationManager.pausesLocationUpdatesAutomatically = false
         
-        switch userDefaults.string(forKey: "accuracy_preference") ?? "medium" {
+        switch userDefaults.string(forKey: "accuracy_preference") ?? "high" {
         case "high":
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
         case "low":
