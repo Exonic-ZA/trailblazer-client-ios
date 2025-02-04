@@ -21,7 +21,8 @@ struct TrailblazerPhoto: Codable {
         self.fileName = fileName
         self.fileExtension = fileExtension
         self.deviceId = deviceId
-        self.longitude = Double(truncating: longitude as NSNumber)
-        self.latitude = Double(truncating: latitude as NSNumber)
+        self.longitude = longitude
+        self.latitude = latitude
     }
 }
+

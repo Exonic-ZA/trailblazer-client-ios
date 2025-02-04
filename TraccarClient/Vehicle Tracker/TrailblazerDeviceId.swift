@@ -10,18 +10,19 @@ import Foundation
 
 struct TrailblazerDeviceId: Codable {
     let id: Int
-    var attributes: [String:Int]?
+    var attributes: [String: String]?
     let groupId: Int
     let calendarId: Int
     let name: String
     let uniqueId: String
     let status: String
-    let lastUpdate: String
+    let lastUpdate: String?
     let positionId: Int
-    let phone: Int?
+    let phone: String?
     let model: String?
     let contact: String?
     let category: String?
     let disabled: Bool
-    let expirationTime: String?
+    let expirationTime: Date?
 }
+

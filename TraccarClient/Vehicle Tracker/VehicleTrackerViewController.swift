@@ -275,7 +275,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
 }
 
 extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelegate, NetworkManagerDelegate, TrailblazerNetworkManagerDelegate, CLLocationManagerDelegate, UIImagePickerControllerDelegate {
- 
+    
     func updateIdentifier() {
         vehicleReg.text = viewModel?.deviceIdentifier
     }
@@ -304,120 +304,132 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
-
+        
         guard let image = info[.originalImage] as? UIImage else {
             print("No image found")
             return
         }
-
-        self.activityLoader.startAnimating()
-        let renderedImage = resizeImageRendering(image)!
-        let resizedImage = reduceImage(renderedImage)
-        let imageData = NSData(data: resizedImage.jpegData(compressionQuality: 1.0)!)
         
-        let photoInfo = TrailblazerPhoto(imageData as Data,
-                                         fileName: viewModel?.deviceIdentifier ?? "",
-                                         fileExtension: "jpg",
-                                         deviceId: viewModel?.deviceIdentifier ?? "",
-                                         longitude: photoLocation.location?.coordinate.longitude ?? 0.0,
-                                         latitude: photoLocation.location?.coordinate.latitude ?? 0.0)
+        self.activityLoader.startAnimating()
+        
+        guard let imageData = image.jpegData(compressionQuality: 1.0) else {
+            print("❌ Failed to convert image to Data")
+            return
+        }
+        
+        let photoInfo = TrailblazerPhoto(
+            imageData,
+            fileName: viewModel?.deviceIdentifier ?? "",
+            fileExtension: "jpg",
+            deviceId: viewModel?.deviceIdentifier ?? "",
+            longitude: photoLocation.location?.coordinate.longitude ?? 0.0,
+            latitude: photoLocation.location?.coordinate.latitude ?? 0.0
+        )
         
         sendPhoto(photoInfo, image: image)
     }
     
+    
+    
     func sendPhoto(_ photoInfo: TrailblazerPhoto, image: UIImage) {
         self.uploadLabel.text = "Uploading image"
         
-        trailblazerNetworkManager.retrieveDeviceId((viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased())!) { [weak self] result in
+        let identifier = viewModel?.deviceIdentifier?.filter { $0 != " " }.uppercased() ?? ""
+        trailblazerNetworkManager.retrieveDeviceId(identifier) { [weak self] result in
             if let error = result.error {
-                DispatchQueue.main.async() {
+                DispatchQueue.main.async {
                     self?.uploadLabel.text = error.localizedDescription
                     self?.activityLoader.stopAnimating()
                 }
-            } else {
-                let deviceId = result.deviceId?.id ?? 0
-                self?.trailblazerNetworkManager.createMetadata(photoInfo, deviceId: deviceId) { metaResult in
-                    let result = TrailblazerMetadata(id: metaResult.id,
-                                                     fileName: metaResult.fileName,
-                                                     fileExtension: metaResult.fileExtension,
-                                                     uploadedAt: metaResult.uploadedAt,
-                                                     deviceId: metaResult.deviceId,
-                                                     latitude: metaResult.latitude,
-                                                     longitude: metaResult.longitude)
-                    self?.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
-                        DispatchQueue.main.async() {
+                return
+            }
+            
+            guard let deviceId = result.deviceId?.id else {
+                DispatchQueue.main.async {
+                    self?.uploadLabel.text = "Invalid device ID"
+                    self?.activityLoader.stopAnimating()
+                }
+                return
+            }
+            
+            self?.trailblazerNetworkManager.createMetadata(photoInfo, deviceId: deviceId) { metaResult in
+                if let compressedData = self?.ensureImageSize(image) {
+                    let compressedImage = UIImage(data: compressedData)
+                    let newPhotoInfo = TrailblazerPhoto(
+                        compressedData,
+                        fileName: photoInfo.fileName,
+                        fileExtension: photoInfo.fileExtension,
+                        deviceId: photoInfo.deviceId,
+                        longitude: photoInfo.longitude,
+                        latitude: photoInfo.latitude
+                    )
+                    
+                    self?.trailblazerNetworkManager.sendPhoto(compressedImage!, metaResult: metaResult) { [weak self] photoResult in
+                        DispatchQueue.main.async {
                             self?.uploadLabel.text = "Upload Successful"
                             self?.activityLoader.stopAnimating()
                         }
                         print(photoResult)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self?.uploadLabel.text = "Image processing failed"
+                        self?.activityLoader.stopAnimating()
                     }
                 }
             }
         }
     }
     
-    func resizeImageRendering(_ image: UIImage) -> UIImage? {
-        let maxSize = CGSize(width: 1000, height: 1000)
-
-        let availableRect = AVFoundation.AVMakeRect(aspectRatio: image.size, insideRect: .init(origin: .zero, size: maxSize))
-        let targetSize = availableRect.size
-
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        let renderer = UIGraphicsImageRenderer(size: targetSize, format: format)
-
-        let resized = renderer.image { (context) in
-            image.draw(in: CGRect(origin: .zero, size: targetSize))
+    
+    
+    func ensureImageSize(_ image: UIImage) -> Data? {
+        if let compressedData = image.optimizedJPEGData() {
+            return compressedData
+        }
+        return nil
+    }
+}
+    
+    extension UIImage {
+        /// Optimized JPEG compression with binary search
+        func optimizedJPEGData(maxFileSize: Int = 10_000_000) -> Data? {
+            var minQuality: CGFloat = 0.1
+            var maxQuality: CGFloat = 1.0
+            var bestData: Data?
+            
+            while minQuality <= maxQuality {
+                let midQuality = (minQuality + maxQuality) / 2
+                if let data = self.jpegData(compressionQuality: midQuality) {
+                    if data.count < maxFileSize {
+                        bestData = data
+                        minQuality = midQuality + 0.01 // Increase quality
+                    } else {
+                        maxQuality = midQuality - 0.01 // Decrease quality
+                    }
+                } else {
+                    break
+                }
+            }
+            
+            // If compression failed, try resizing
+            if let bestData = bestData, bestData.count > maxFileSize {
+                if let resized = self.resized(to: 800) {
+                    return resized.optimizedJPEGData() // Reattempt compression
+                }
+            }
+            return bestData
         }
         
-        return resized
-    }
-    
-    func reduceImage(_ image: UIImage) -> UIImage {
-        var imgData = NSData(data: image.jpegData(compressionQuality: 1.0)!)
-        var imageSize: Int = imgData.count
-        var resizedImage = image
-        var compressionQuality: CGFloat = 1.0
-
-        if imageSize > 10_000_000 {
-            while imageSize > 10_000_000 { // 10MB
-                if compressionQuality > 0.2 {
-                    compressionQuality -= 0.1 // Reduce quality first
-                } else {
-                    resizedImage = resizedImage.resizeWithPercent(percentage: 0.8)! // Then resize
-                }
-                
-                imgData = NSData(data: resizedImage.jpegData(compressionQuality: compressionQuality)!)
-                imageSize = imgData.count
-                
-                let sizeKB = Double(imageSize) / 1000.0
-                DispatchQueue.main.async {
-                    self.uploadLabel.text = "Actual size of image in KB: \(sizeKB)"
-                }
-                
-                if imageSize <= 10_000_000 { break } // Exit loop once it's below 10MB
-            }
-        } else {
-            DispatchQueue.main.async {
-                self.uploadLabel.text = "Size is less than 10MB"
-                resizedImage = resizedImage.resizeWithPercent(percentage: 0.1)!
+        /// Resizes image to fit within `maxSize` while maintaining aspect ratio
+        func resized(to maxSize: CGFloat = 1000) -> UIImage? {
+            let aspectRatio = size.width / size.height
+            let newWidth = aspectRatio > 1 ? maxSize : maxSize * aspectRatio
+            let newHeight = aspectRatio > 1 ? maxSize / aspectRatio : maxSize
+            
+            let renderer = UIGraphicsImageRenderer(size: CGSize(width: newWidth, height: newHeight))
+            return renderer.image { _ in
+                self.draw(in: CGRect(origin: .zero, size: CGSize(width: newWidth, height: newHeight)))
             }
         }
-
-        return resizedImage
     }
-}
-
-extension UIImage {
-    func resizeWithPercent(percentage: CGFloat) -> UIImage? {
-        let imageView = UIImageView(frame: CGRect(origin: .zero, size: CGSize(width: size.width * percentage, height: size.height * percentage)))
-        imageView.contentMode = .scaleAspectFit
-        imageView.image = self
-        UIGraphicsBeginImageContextWithOptions(imageView.bounds.size, false, scale)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
-        imageView.layer.render(in: context)
-        guard let result = UIGraphicsGetImageFromCurrentImageContext() else { return nil }
-        UIGraphicsEndImageContext()
-        return result
-    }
-}

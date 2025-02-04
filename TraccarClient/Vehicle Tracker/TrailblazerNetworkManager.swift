@@ -8,10 +8,7 @@
 
 import UIKit
 
-protocol TrailblazerNetworkManagerDelegate: AnyObject {
-//    func createMetadata(_ photoInfo: TrailblazerPhoto)
-//    func sendPhoto(_ photoInfo: TrailblazerPhoto, metadata: TrailblazerMetadata)
-}
+protocol TrailblazerNetworkManagerDelegate: AnyObject {}
 
 typealias HTTPHeaders = [String: String]
 
@@ -34,30 +31,44 @@ class TrailblazerNetworkManager: NSObject {
         password = Bundle.main.object(forInfoDictionaryKey: "Password") as? String ?? ""
     }
     
-    func retrieveDeviceId(_ deviceId: String, completion: @escaping(DeviceIdResult) -> Void) {
+    func retrieveDeviceId(_ deviceId: String, completion: @escaping (DeviceIdResult) -> Void) {
         let loginString = "\(self.username):\(self.password)"
         let loginData = loginString.data(using: .utf8)!
         let base64LoginString = loginData.base64EncodedString()
         
-        let url = String("https://pathfinder.sbmkinetics.co.za/api/devices?uniqueId=\(deviceId)")
+        let url = "https://pathfinder.sbmkinetics.co.za/api/devices?uniqueId=\(deviceId)"
         deviceIdURL = URL(string: url)!
         var request = URLRequest(url: deviceIdURL)
         request.httpMethod = "GET"
+        request.timeoutInterval = 10
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept") // Ensure API expects JSON
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-
+        
         let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("❌ Error: \(error.localizedDescription)")
                 return
             }
             
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 HTTP Status Code: \(httpResponse.statusCode)")
+            }
+            
+            guard let data = data else {
+                print("❌ No data received")
+                return
+            }
+            
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("📜 Raw Response Data: \(dataString)")
+            }
+            
             let decoder = JSONDecoder()
             do {
-                let jsonData = try decoder.decode([TrailblazerDeviceId].self, from: data!)
+                let jsonData = try decoder.decode([TrailblazerDeviceId].self, from: data)
                 if jsonData.isEmpty {
-                    let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Please check with your operator if your device is correctly set up on the system"])
+                    let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Device not found on system"])
                     completion(DeviceIdResult(deviceId: nil, error: error))
                 } else {
                     completion(DeviceIdResult(deviceId: jsonData[0], error: nil))
@@ -69,13 +80,13 @@ class TrailblazerNetworkManager: NSObject {
         dataTask.resume()
     }
     
-    func createMetadata(_ photo: TrailblazerPhoto, deviceId: Int, completion: @escaping(TrailblazerMetadata) -> Void) {
+    func createMetadata(_ photo: TrailblazerPhoto, deviceId: Int, completion: @escaping (MetadataResponse) -> Void) {
         let json: [String: Any] = [
-            "fileName" : photo.fileName,
-            "fileExtension" : photo.fileExtension,
-            "deviceId" : deviceId,
-            "latitude" : photo.latitude,
-            "longitude" : photo.longitude
+            "fileName": photo.fileName,
+            "fileExtension": photo.fileExtension,
+            "deviceId": deviceId,
+            "latitude": photo.latitude,
+            "longitude": photo.longitude
         ]
         
         guard let jsonData = try? JSONSerialization.data(withJSONObject: json, options: []) else {
@@ -86,62 +97,76 @@ class TrailblazerNetworkManager: NSObject {
         let loginString = "\(self.username):\(self.password)"
         let loginData = loginString.data(using: .utf8)!
         let base64LoginString = loginData.base64EncodedString()
-
+        
         var request = URLRequest(url: metadataURL)
         request.httpMethod = "POST"
+        request.timeoutInterval = 10
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept") // Ensure API expects JSON
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
         request.httpBody = jsonData
-
+        
         let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("❌ Error: \(error.localizedDescription)")
                 return
             }
-            let decoder = JSONDecoder()
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 HTTP Status Code: \(httpResponse.statusCode)")
+            }
+            
+            guard let data = data else {
+                print("❌ No data received")
+                return
+            }
+            
             do {
-                let jsonData = try decoder.decode(TrailblazerMetadata.self, from: data!)
-                completion(jsonData)
+                let metadata = try JSONDecoder().decode(MetadataResponse.self, from: data)
+                completion(metadata)
             } catch {
                 print("❌ JSON Decoding Error: \(error)")
+                if let dataString = String(data: data, encoding: .utf8) {
+                    print("📜 Raw Response Data: \(dataString)")
+                }
             }
         }
         dataTask.resume()
     }
     
-    func sendPhoto(_ photo: UIImage, metaResult: TrailblazerMetadata, completion: @escaping (String) -> Void) {
-        guard let imageData = photo.jpegData(compressionQuality: 0.2) else {
+    func sendPhoto(_ photo: UIImage, metaResult: MetadataResponse, completion: @escaping (String) -> Void) {
+        guard let imageData = photo.optimizedJPEGData() else {
+            print("❌ Failed to compress image")
             return
         }
-        let url = String("https://pathfinder.sbmkinetics.co.za/api/images/\(metaResult.id)/upload")
-        photoURL = URL(string: url)!
+        
+        let url = "https://pathfinder.sbmkinetics.co.za/api/images/\(metaResult.id)/upload"
+        guard let photoURL = URL(string: url) else { return }
         var request = URLRequest(url: photoURL)
         request.httpMethod = "POST"
-        request.setValue("image/png", forHTTPHeaderField: "Content-Type") // ✅ Matches cURL
-        request.setValue("*/*", forHTTPHeaderField: "Accept") // ✅ Matches cURL
-
-        // Add Authorization header (Basic Auth)
+        request.timeoutInterval = 10
+        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+        request.setValue("*/*", forHTTPHeaderField: "Accept")
+        
         let loginString = "\(self.username):\(self.password)"
         let loginData = loginString.data(using: .utf8)!
         let base64LoginString = loginData.base64EncodedString()
         request.addValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-
+        
         let session = URLSession.shared
         let dataTask = session.uploadTask(with: request, from: imageData) { responseData, response, error in
             if let error = error {
                 print("❌ Error: \(error.localizedDescription)")
                 return
             }
-
             completion("Upload Successful")
         }
         dataTask.resume()
     }
     
-}
-
-struct DeviceIdResult {
-    let deviceId: TrailblazerDeviceId?
-    let error: Error?
+    
+    struct DeviceIdResult {
+        let deviceId: TrailblazerDeviceId?
+        let error: Error?
+    }
 }
