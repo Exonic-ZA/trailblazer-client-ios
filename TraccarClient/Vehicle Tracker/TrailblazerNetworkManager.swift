@@ -69,7 +69,7 @@ class TrailblazerNetworkManager: NSObject {
         dataTask.resume()
     }
     
-    func createMetadata(_ photo: TrailblazerPhoto, deviceId: Int, completion: @escaping(TrailblazerMetadata) -> Void) {
+    func createMetadata(_ photo: TrailblazerPhoto, deviceId: Int, completion: @escaping(MetadataResult) -> Void) {
         let json: [String: Any] = [
             "fileName" : photo.fileName,
             "fileExtension" : photo.fileExtension,
@@ -96,21 +96,22 @@ class TrailblazerNetworkManager: NSObject {
 
         let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                print("❌ Error: \(error.localizedDescription)")
+                completion(MetadataResult(metadata: nil, error: error))
                 return
             }
             let decoder = JSONDecoder()
             do {
                 let jsonData = try decoder.decode(TrailblazerMetadata.self, from: data!)
-                completion(jsonData)
+                completion(MetadataResult(metadata: jsonData, error: nil))
             } catch {
-                print("❌ JSON Decoding Error: \(error)")
+                let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey : "Create Metadata JSON Decoding Error"])
+                completion(MetadataResult(metadata: nil, error: error))
             }
         }
         dataTask.resume()
     }
     
-    func sendPhoto(_ photo: UIImage, metaResult: TrailblazerMetadata, completion: @escaping (String) -> Void) {
+    func sendPhoto(_ photo: UIImage, metaResult: TrailblazerMetadata, completion: @escaping (PhotoResult) -> Void) {
         guard let imageData = photo.jpegData(compressionQuality: 0.2) else {
             return
         }
@@ -130,11 +131,11 @@ class TrailblazerNetworkManager: NSObject {
         let session = URLSession.shared
         let dataTask = session.uploadTask(with: request, from: imageData) { responseData, response, error in
             if let error = error {
-                print("❌ Error: \(error.localizedDescription)")
+                completion(PhotoResult(uploadInfo: nil, error: error))
                 return
             }
 
-            completion("Upload Successful")
+            completion(PhotoResult(uploadInfo: "Upload Successful", error: nil))
         }
         dataTask.resume()
     }
@@ -143,5 +144,15 @@ class TrailblazerNetworkManager: NSObject {
 
 struct DeviceIdResult {
     let deviceId: TrailblazerDeviceId?
+    let error: Error?
+}
+
+struct MetadataResult {
+    let metadata: TrailblazerMetadata?
+    let error: Error?
+}
+
+struct PhotoResult {
+    let uploadInfo: String?
     let error: Error?
 }

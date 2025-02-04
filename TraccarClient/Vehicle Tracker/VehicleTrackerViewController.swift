@@ -315,12 +315,15 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
         let resizedImage = reduceImage(renderedImage)
         let imageData = NSData(data: resizedImage.jpegData(compressionQuality: 1.0)!)
         
+        let photoLongitude: Double = (photoLocation.location?.coordinate.longitude)!
+        let photoLatitude: Double = (photoLocation.location?.coordinate.latitude)!
+        
         let photoInfo = TrailblazerPhoto(imageData as Data,
                                          fileName: viewModel?.deviceIdentifier ?? "",
                                          fileExtension: "jpg",
                                          deviceId: viewModel?.deviceIdentifier ?? "",
-                                         longitude: photoLocation.location?.coordinate.longitude ?? 0.0,
-                                         latitude: photoLocation.location?.coordinate.latitude ?? 0.0)
+                                         longitude: photoLongitude,
+                                         latitude: photoLatitude)
         
         sendPhoto(photoInfo, image: image)
     }
@@ -337,19 +340,28 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
             } else {
                 let deviceId = result.deviceId?.id ?? 0
                 self?.trailblazerNetworkManager.createMetadata(photoInfo, deviceId: deviceId) { metaResult in
-                    let result = TrailblazerMetadata(id: metaResult.id,
-                                                     fileName: metaResult.fileName,
-                                                     fileExtension: metaResult.fileExtension,
-                                                     uploadedAt: metaResult.uploadedAt,
-                                                     deviceId: metaResult.deviceId,
-                                                     latitude: metaResult.latitude,
-                                                     longitude: metaResult.longitude)
-                    self?.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
+                    if let error = metaResult.error {
                         DispatchQueue.main.async() {
-                            self?.uploadLabel.text = "Upload Successful"
+                            self?.uploadLabel.text = error.localizedDescription
                             self?.activityLoader.stopAnimating()
                         }
-                        print(photoResult)
+                    } else {
+                        if let metadata = metaResult.metadata {
+                            let result = TrailblazerMetadata(id: metadata.id,
+                                                             fileName: metadata.fileName,
+                                                             fileExtension: metadata.fileExtension,
+                                                             uploadedAt: metadata.uploadedAt,
+                                                             deviceId: metadata.deviceId,
+                                                             latitude: metadata.latitude,
+                                                             longitude: metadata.longitude)
+                            self?.trailblazerNetworkManager.sendPhoto(image, metaResult: result) { [weak self] photoResult in
+                                DispatchQueue.main.async() {
+                                    self?.uploadLabel.text = "Upload Successful"
+                                    self?.activityLoader.stopAnimating()
+                                }
+                                print(photoResult)
+                            }
+                        }
                     }
                 }
             }
