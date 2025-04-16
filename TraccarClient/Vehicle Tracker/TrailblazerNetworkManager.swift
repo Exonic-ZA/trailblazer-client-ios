@@ -24,9 +24,9 @@ class TrailblazerNetworkManager: NSObject {
     weak var delegate: TrailblazerNetworkManagerDelegate?
     
     override init() {
-        deviceIdURL = URL(string: "https://pathfinder.sbmkinetics.co.za/api/devices")!
-        metadataURL = URL(string: "https://pathfinder.sbmkinetics.co.za/api/images")!
-        photoURL = URL(string: "https://pathfinder.sbmkinetics.co.za/api/images")!
+        deviceIdURL = URL(string: "https://trailblazer.sbmkinetics.co.za/api/devices")!
+        metadataURL = URL(string: "https://trailblazer.sbmkinetics.co.za/api/images")!
+        photoURL = URL(string: "https://trailblazer.sbmkinetics.co.za/api/images")!
         username = Bundle.main.object(forInfoDictionaryKey: "Username") as? String ?? ""
         password = Bundle.main.object(forInfoDictionaryKey: "Password") as? String ?? ""
     }
@@ -36,7 +36,7 @@ class TrailblazerNetworkManager: NSObject {
         let loginData = loginString.data(using: .utf8)!
         let base64LoginString = loginData.base64EncodedString()
         
-        let url = "https://pathfinder.sbmkinetics.co.za/api/devices?uniqueId=\(deviceId)"
+        let url = "https://trailblazer.sbmkinetics.co.za/api/devices?uniqueId=\(deviceId)"
         deviceIdURL = URL(string: url)!
         var request = URLRequest(url: deviceIdURL)
         request.httpMethod = "GET"
@@ -140,7 +140,7 @@ class TrailblazerNetworkManager: NSObject {
             return
         }
         
-        let url = "https://pathfinder.sbmkinetics.co.za/api/images/\(metaResult.id)/upload"
+        let url = "https://trailblazer.sbmkinetics.co.za/api/images/\(metaResult.id)/upload"
         guard let photoURL = URL(string: url) else { return }
         var request = URLRequest(url: photoURL)
         request.httpMethod = "POST"
