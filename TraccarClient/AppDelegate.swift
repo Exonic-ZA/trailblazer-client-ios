@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
     var trackingController: TrackingController?
     var positionProvider: PositionProvider?
     
-    static var instance: AppDelegate {
+    static var instance: AppDelegate {	
         return UIApplication.shared.delegate as! AppDelegate
     }
     

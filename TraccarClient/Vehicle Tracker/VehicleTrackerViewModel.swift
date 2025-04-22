@@ -18,6 +18,9 @@ struct VehicleTrackerViewModel {
         clockIn ? " Clock out" : " Clock in"
     }
     
+    var sosStatus = "● Sending SOS"
+    var sosSent = "SOS Sent"
+    
     var deviceIdentifier: String? {
         UserDefaults.standard.string(forKey: "device_id_preference") ?? ""
     }
@@ -29,4 +32,5 @@ struct VehicleTrackerViewModel {
     var locationAccuracy: String? {
         UserDefaults.standard.string(forKey: "accuracy_preference")
     }
+    
 }

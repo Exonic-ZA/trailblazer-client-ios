@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Trailblazer Pioneer - Client</string>
+	<string>Trailblazer</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
@@ -31,12 +31,20 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to use your camera to take photos while on routes.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This is a tracking application and therefore requires access to location services</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs to save route photos to your camera roll.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your camera roll to send route photos to the platform.</string>
+	<key>Password</key>
+	<string>Babbling+Stomp+Bottling8+Payroll</string>
 	<key>UIApplicationShortcutItems</key>
 	<array>
 		<dict>
@@ -89,5 +97,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>Username</key>
+	<string>system@trailblazer.internal</string>
 </dict>
 </plist>

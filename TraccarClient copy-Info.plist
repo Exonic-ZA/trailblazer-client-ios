@@ -89,5 +89,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to use your camera to take photos while on routes.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs to save route photos to your camera roll.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your camera roll to send route photos to the platform.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>login user for uploads</string>
 </dict>
 </plist>
