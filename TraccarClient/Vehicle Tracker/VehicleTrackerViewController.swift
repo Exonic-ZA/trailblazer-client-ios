@@ -113,10 +113,10 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         if viewModel?.deviceIdentifier != "" {
             if sender.state == .began {
                 sendingSOS = true
-                let pulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: sosButton.center)
-                pulse.animationDuration = 1.0
-                pulse.backgroundColor = UIColor.red.cgColor
-                self.view.layer.insertSublayer(pulse, below: self.view.layer)
+                let labelPulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: connectedLabel.center)
+                                labelPulse.animationDuration = 1.0
+                                labelPulse.backgroundColor = UIColor.green.cgColor
+                                self.view.layer.insertSublayer(labelPulse, below: self.view.layer)
                 let generator = UINotificationFeedbackGenerator()
                 generator.notificationOccurred(.warning)
                 
