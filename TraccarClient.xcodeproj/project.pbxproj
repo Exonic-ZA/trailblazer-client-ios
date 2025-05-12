@@ -49,6 +49,9 @@
 		CEF643271B919FFA00195CEA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = CEF643241B919FFA00195CEA /* LaunchScreen.xib */; };
 		CEF6433C1B91AA9400195CEA /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CED4873317DB1BF6007FCF57 /* MainStoryboard.storyboard */; };
 		CEF6433D1B91AA9400195CEA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = CEF643371B91A94600195CEA /* Localizable.strings */; };
+		F0597E3D2DD171D4003331B2 /* Temp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0597E3C2DD171D4003331B2 /* Temp.swift */; };
+		F0597E412DD189B8003331B2 /* AboutUs.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0597E402DD189B8003331B2 /* AboutUs.swift */; };
+		F0597E432DD1CB02003331B2 /* AboutUsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0597E422DD1CB02003331B2 /* AboutUsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -145,6 +148,9 @@
 		CEF643361B91A94600195CEA /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEF643381B91A95700195CEA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEF643391B91A98300195CEA /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F0597E3C2DD171D4003331B2 /* Temp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Temp.swift; sourceTree = "<group>"; };
+		F0597E402DD189B8003331B2 /* AboutUs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutUs.swift; sourceTree = "<group>"; };
+		F0597E422DD1CB02003331B2 /* AboutUsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutUsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +200,9 @@
 				935B831F2D434BA30087E444 /* TrailblazerNetworkManager.swift */,
 				935B83212D434CAA0087E444 /* TrailblazerPhoto.swift */,
 				937966EB2D4CCAD100D65EB2 /* TrailblazerDeviceId.swift */,
+				F0597E3C2DD171D4003331B2 /* Temp.swift */,
+				F0597E402DD189B8003331B2 /* AboutUs.swift */,
+				F0597E422DD1CB02003331B2 /* AboutUsViewController.swift */,
 			);
 			path = "Vehicle Tracker";
 			sourceTree = "<group>";
@@ -439,7 +448,9 @@
 				CB7ED0801F6602CD00A33FCF /* Position.swift in Sources */,
 				CBAA0F7F1F68E807008BBBBE /* MainViewController.swift in Sources */,
 				7338360F2D4BABD8004CB4E7 /* TrailblazerMetadata.swift in Sources */,
+				F0597E412DD189B8003331B2 /* AboutUs.swift in Sources */,
 				CB7ED0821F661B4F00A33FCF /* PositionProvider.swift in Sources */,
+				F0597E432DD1CB02003331B2 /* AboutUsViewController.swift in Sources */,
 				CB4197991F67724F008F301C /* NetworkManager.swift in Sources */,
 				CB7ED0841F662BAF00A33FCF /* AppDelegate.swift in Sources */,
 				5E394EBE28A9CC7600396F33 /* BatteryStatus.swift in Sources */,
@@ -450,6 +461,7 @@
 				93F0C4C32CE23FAC00A7D92D /* VehicleTrackerViewController.swift in Sources */,
 				CBAA0F7D1F68E14C008BBBBE /* StatusViewController.swift in Sources */,
 				CBAA0F811F68EB62008BBBBE /* TrackingController.swift in Sources */,
+				F0597E3D2DD171D4003331B2 /* Temp.swift in Sources */,
 				5E716A271F63A0B100A2DBC3 /* DistanceCalculator.swift in Sources */,
 				93F0C4C52CE24E1700A7D92D /* VehicleTrackerViewModel.swift in Sources */,
 				5E716A291F63A45A00A2DBC3 /* RequestManager.swift in Sources */,

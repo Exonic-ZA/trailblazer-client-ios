@@ -21,11 +21,29 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     @IBOutlet weak var settingsView: UIView!
     @IBOutlet weak var settings: UIButton!
     @IBOutlet weak var takePhoto: UIButton!
+    @IBOutlet weak var aboutUsButton: UIButton!
     @IBOutlet weak var uploadLabel: UILabel!
     @IBOutlet weak var activityLoader: UIActivityIndicatorView!
     
+    @IBOutlet weak var overlayView: UIView!
+    @IBOutlet weak var disclaimerView: UIView!
+    @IBOutlet weak var disclaimerbodyText: UILabel!
+    @IBOutlet weak var consentButton: UIButton!
+    
+    var showDiscalimer: Bool = true
+     let bodyString = """
+    This app collects and stores your precise location data even when t he app is closed or not in use to enable:
+    - Real-time tracking of delivery vehicles and sales personnel
+    - SOS emergency response functionality
+    - Route optimization and performance analysis \n
+    Your location is only tracked when tracking is manually enabled. The tracking status is always clearly visible in the app.\n
+    Location data is securely stored and used solely for business operations purposes. It is never sold to third parties for marketing.
+    You can disable tracking at any time through the app.
+    """
+    
     var viewModel: VehicleTrackerViewModel?
     var settingsViewController = SettingsViewController()
+    var aboutUsViewController: AboutUsViewController!
     var imagePicker: UIImagePickerController!
     var photoLocation = CLLocationManager()
     
@@ -87,6 +105,12 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         sosGesture.delegate = self
         self.sosButton.addGestureRecognizer(sosGesture)
 
+        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.90)
+        disclaimerView.layer.cornerRadius = 30
+        consentButton.layer.cornerRadius = 25
+        
+        disclaimerbodyText.text = bodyString
+        
         photoLocation.desiredAccuracy = kCLLocationAccuracyBest
         photoLocation.requestAlwaysAuthorization()
         photoLocation.startUpdatingLocation()
@@ -176,6 +200,15 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         clockInAndOut.setTitle(self.viewModel?.clockInOrOut, for: .normal)
     }
     
+    @IBAction func consentPressed(_ sender: Any) {
+        showDiscalimer = false
+        overlayView.isHidden = true
+    }
+    
+    @IBAction func aboutUsPressed(_ sender: Any) {
+        performSegue(withIdentifier: "AboutUs", sender: self)
+    }
+    
     func start() {
         self.stopped = false
         if self.online {
@@ -212,6 +245,8 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
             settingsViewController.vehicleIdentifier = viewModel?.deviceIdentifier
             settingsViewController.serverURL = viewModel?.serverURL
             settingsViewController.locationAccuracy = viewModel?.locationAccuracy
+        } else if segue.destination is AboutUsViewController {
+            aboutUsViewController = (segue.destination as? AboutUsViewController)!
         }
     }
     
