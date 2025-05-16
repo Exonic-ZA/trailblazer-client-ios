@@ -72,11 +72,11 @@ class AboutUs: UIViewController {
         .font: UIFont.systemFont(ofSize: 30.0, weight: .bold),
     ]
     let boldTextAttributes: [NSAttributedString.Key: Any] = [
-        .foregroundColor: UIColor.black,
+        .foregroundColor: UIColor.label,
         .font: UIFont.systemFont(ofSize: 20.0, weight: .bold),
     ]
     let normalTextAttributes: [NSAttributedString.Key: Any] = [
-        .foregroundColor: UIColor.black,
+        .foregroundColor: UIColor.label,
         .font: UIFont.systemFont(ofSize: 20.0),
     ]
 

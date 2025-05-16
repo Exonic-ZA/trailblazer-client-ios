@@ -24,15 +24,15 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     @IBOutlet weak var aboutUsButton: UIButton!
     @IBOutlet weak var uploadLabel: UILabel!
     @IBOutlet weak var activityLoader: UIActivityIndicatorView!
-    
+
     @IBOutlet weak var overlayView: UIView!
     @IBOutlet weak var disclaimerView: UIView!
     @IBOutlet weak var disclaimerbodyText: UILabel!
     @IBOutlet weak var consentButton: UIButton!
-    
+
     var showDiscalimer: Bool = true
-     let bodyString = """
-    This app collects and stores your precise location data even when t he app is closed or not in use to enable:
+    let bodyString = """
+    This app collects and stores your precise location data even when the app is closed or not in use to enable:
     - Real-time tracking of delivery vehicles and sales personnel
     - SOS emergency response functionality
     - Route optimization and performance analysis \n
@@ -40,13 +40,13 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     Location data is securely stored and used solely for business operations purposes. It is never sold to third parties for marketing.
     You can disable tracking at any time through the app.
     """
-    
+
     var viewModel: VehicleTrackerViewModel?
     var settingsViewController = SettingsViewController()
     var aboutUsViewController: AboutUsViewController!
     var imagePicker: UIImagePickerController!
     var photoLocation = CLLocationManager()
-    
+
     var online = false
     var waiting = false
     var stopped = false
@@ -58,48 +58,48 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     let networkManager = NetworkManager()
     let userDefaults = UserDefaults.standard
     let trailblazerNetworkManager = TrailblazerNetworkManager()
-    
+
     var buffer = false
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         databaseHelper = DatabaseHelper()
-        
+
         buffer = userDefaults.bool(forKey: "buffer_preference")
         self.viewModel = VehicleTrackerViewModel()
-        
+
         positionProvider.delegate = self
         locationManager.delegate = self
         networkManager.delegate = self
         trailblazerNetworkManager.delegate = self
         photoLocation.delegate = self
-        
+
         setupView()
     }
-    
+
     func setupView() {
         sosMessage.text = ""
         uploadLabel.text = ""
-        
+
         connectedLabel.layer.borderWidth = 1.5
         connectedLabel.layer.borderColor = UIColor.darkGray.cgColor
         connectedLabel.backgroundColor = UIColor.lightGray
-        connectedLabel.textColor = UIColor.black
+        connectedLabel.textColor = UIColor.label
         connectedLabel.layer.cornerRadius = 16
         connectedLabel.clipsToBounds = true
-        
+
         vehicleView.layer.cornerRadius = 16
         vehicleReg.text = viewModel?.deviceIdentifier
-        
+
         connectedLabel.text = viewModel?.connectionText
-        
+
         clockInAndOut.layer.cornerRadius = 16
         clockInAndOut.setTitle(self.viewModel?.clockInOrOut, for: .normal)
         clockInAndOut.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        
+
         settingsView.layer.cornerRadius = settingsView.frame.height / 2
         takePhoto.layer.cornerRadius = takePhoto.frame.height / 2
-        
+
         let sosGesture = UILongPressGestureRecognizer(target: self, action: #selector(sosPressed))
         sosGesture.minimumPressDuration = 2.0
         sosGesture.delegate = self
@@ -108,14 +108,24 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.90)
         disclaimerView.layer.cornerRadius = 30
         consentButton.layer.cornerRadius = 25
-        
+
         disclaimerbodyText.text = bodyString
-        
+        disclaimerbodyText.textColor = UIColor.label
+        consentButton.setTitleColor(.white, for: .normal)
+
+        let hasConsented = userDefaults.bool(forKey: "hasConsentedToDisclaimer")
+        overlayView.isHidden = hasConsented
+
         photoLocation.desiredAccuracy = kCLLocationAccuracyBest
         photoLocation.requestAlwaysAuthorization()
         photoLocation.startUpdatingLocation()
     }
 
+    @IBAction func consentPressed(_ sender: Any) {
+        showDiscalimer = false
+        overlayView.isHidden = true
+        userDefaults.set(true, forKey: "hasConsentedToDisclaimer")
+    }
     @IBAction func clockInOrOut(_ sender: UIButton) {
         if viewModel?.deviceIdentifier != "" {
             if viewModel?.clockIn == true {
@@ -134,31 +144,69 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     }
     
     @IBAction func sosPressed(_ sender: UILongPressGestureRecognizer) {
-        if viewModel?.deviceIdentifier != "" {
-            if sender.state == .began {
+        guard viewModel?.deviceIdentifier != "" else {
+            performSegue(withIdentifier: "Settings", sender: self)
+            return
+        }
+
+        switch sender.state {
+        case .began:
+            if !sendingSOS {
                 sendingSOS = true
-                let labelPulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: connectedLabel.center)
+
+                self.view.layer.sublayers?.removeAll(where: { $0.name == "pulseLayer" })
+
+                let labelPulse = PulseAnimation(
+                    numberOfPulses: 1,
+                    radius: 50,
+                    position: connectedLabel.center,
+                    color: .green,
+                    repeatForever: true
+                )
                 labelPulse.animationDuration = 1.0
-                labelPulse.backgroundColor = UIColor.green.cgColor
                 self.view.layer.insertSublayer(labelPulse, below: self.view.layer)
-                
-                let pulse = PulseAnimation(numberOfPulses: 8, radius: 50, position: sosButton.center)
+
+                let pulse = PulseAnimation(
+                    numberOfPulses: 1,
+                    radius: 50,
+                    position: sosButton.center,
+                    color: .red,
+                    repeatForever: true
+                )
                 pulse.animationDuration = 1.0
-                pulse.backgroundColor = UIColor.red.cgColor
                 self.view.layer.insertSublayer(pulse, below: self.view.layer)
+
                 let generator = UINotificationFeedbackGenerator()
                 generator.notificationOccurred(.warning)
-                
+
                 clockin()
                 connectedLabel.text = viewModel?.sosStatus
-            } else if sender.state == .ended {
+            }
+        
+        case .ended:
+            if sendingSOS {
+                sendingSOS = false
                 connectedLabel.text = viewModel?.connectionText
                 sosMessage.text = viewModel?.sosSent
+
+                self.view.layer.sublayers?
+                    .filter { $0.name == "pulseLayer" }
+                    .forEach { layer in
+                        let fade = CABasicAnimation(keyPath: "opacity")
+                        fade.fromValue = layer.opacity
+                        fade.toValue = 0
+                        fade.duration = 0.3
+                        fade.fillMode = .forwards
+                        fade.isRemovedOnCompletion = false
+                        layer.add(fade, forKey: "fadeOut")
+                    }
             }
-        } else {
-            performSegue(withIdentifier: "Settings", sender: self)
+
+        default:
+            break
         }
     }
+
     
     @IBAction func takePhotoPressed(_ sender: UIButton) {
         if viewModel?.deviceIdentifier != "" {
@@ -198,11 +246,6 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         clockInAndOut.setImage(UIImage(systemName: "play.fill"), for: .normal)
         connectedLabel.text = viewModel?.connectionText
         clockInAndOut.setTitle(self.viewModel?.clockInOrOut, for: .normal)
-    }
-    
-    @IBAction func consentPressed(_ sender: Any) {
-        showDiscalimer = false
-        overlayView.isHidden = true
     }
     
     @IBAction func aboutUsPressed(_ sender: Any) {

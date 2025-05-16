@@ -24,18 +24,28 @@ class TrailblazerNetworkManager: NSObject {
     weak var delegate: TrailblazerNetworkManagerDelegate?
     
     override init() {
+        CredentialHelper.preloadToKeychainIfNeeded()
+
         deviceIdURL = URL(string: "https://trailblazer.sbmkinetics.co.za/api/devices")!
         metadataURL = URL(string: "https://trailblazer.sbmkinetics.co.za/api/images")!
         photoURL = URL(string: "https://trailblazer.sbmkinetics.co.za/api/images")!
-        username = Bundle.main.object(forInfoDictionaryKey: "Username") as? String ?? ""
-        password = Bundle.main.object(forInfoDictionaryKey: "Password") as? String ?? ""
+
+        username = KeychainHelper.read(service: "Trailblazer", account: "api-username") ?? ""
+        password = KeychainHelper.read(service: "Trailblazer", account: "api-password") ?? ""
+
+        if username.isEmpty || password.isEmpty {
+            print("❌ Missing credentials from Keychain")
+        }
     }
-    
+
     func retrieveDeviceId(_ deviceId: String, completion: @escaping (DeviceIdResult) -> Void) {
         let loginString = "\(self.username):\(self.password)"
-        let loginData = loginString.data(using: .utf8)!
+        guard let loginData = loginString.data(using: .utf8) else {
+            print("❌ Failed to encode login credentials")
+            return
+        }
         let base64LoginString = loginData.base64EncodedString()
-        
+
         let url = "https://trailblazer.sbmkinetics.co.za/api/devices?uniqueId=\(deviceId)"
         deviceIdURL = URL(string: url)!
         var request = URLRequest(url: deviceIdURL)
@@ -44,26 +54,26 @@ class TrailblazerNetworkManager: NSObject {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        
+
         let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("❌ Error: \(error.localizedDescription)")
                 return
             }
-            
+
             if let httpResponse = response as? HTTPURLResponse {
                 print("📡 HTTP Status Code: \(httpResponse.statusCode)")
             }
-            
+
             guard let data = data else {
                 print("❌ No data received")
                 return
             }
-            
+
             if let dataString = String(data: data, encoding: .utf8) {
                 print("📜 Raw Response Data: \(dataString)")
             }
-            
+
             let decoder = JSONDecoder()
             do {
                 let jsonData = try decoder.decode([TrailblazerDeviceId].self, from: data)
@@ -79,7 +89,7 @@ class TrailblazerNetworkManager: NSObject {
         }
         dataTask.resume()
     }
-    
+
     func createMetadata(_ photo: TrailblazerPhoto, deviceId: Int, completion: @escaping (MetadataResponse) -> Void) {
         let json: [String: Any] = [
             "fileName": photo.fileName,
@@ -88,16 +98,19 @@ class TrailblazerNetworkManager: NSObject {
             "latitude": photo.latitude,
             "longitude": photo.longitude
         ]
-        
+
         guard let jsonData = try? JSONSerialization.data(withJSONObject: json, options: []) else {
             print("❌ Failed to serialize JSON")
             return
         }
-        
+
         let loginString = "\(self.username):\(self.password)"
-        let loginData = loginString.data(using: .utf8)!
+        guard let loginData = loginString.data(using: .utf8) else {
+            print("❌ Failed to encode login credentials")
+            return
+        }
         let base64LoginString = loginData.base64EncodedString()
-        
+
         var request = URLRequest(url: metadataURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 10
@@ -105,22 +118,22 @@ class TrailblazerNetworkManager: NSObject {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
         request.httpBody = jsonData
-        
+
         let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 print("❌ Error: \(error.localizedDescription)")
                 return
             }
-            
+
             if let httpResponse = response as? HTTPURLResponse {
                 print("📡 HTTP Status Code: \(httpResponse.statusCode)")
             }
-            
+
             guard let data = data else {
                 print("❌ No data received")
                 return
             }
-            
+
             do {
                 let metadata = try JSONDecoder().decode(MetadataResponse.self, from: data)
                 completion(metadata)
@@ -133,13 +146,13 @@ class TrailblazerNetworkManager: NSObject {
         }
         dataTask.resume()
     }
-    
+
     func sendPhoto(_ photo: UIImage, metaResult: MetadataResponse, completion: @escaping (String) -> Void) {
         guard let imageData = photo.optimizedJPEGData() else {
             print("❌ Failed to compress image")
             return
         }
-        
+
         let url = "https://trailblazer.sbmkinetics.co.za/api/images/\(metaResult.id)/upload"
         guard let photoURL = URL(string: url) else { return }
         var request = URLRequest(url: photoURL)
@@ -147,12 +160,15 @@ class TrailblazerNetworkManager: NSObject {
         request.timeoutInterval = 10
         request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
         request.setValue("*/*", forHTTPHeaderField: "Accept")
-        
+
         let loginString = "\(self.username):\(self.password)"
-        let loginData = loginString.data(using: .utf8)!
+        guard let loginData = loginString.data(using: .utf8) else {
+            print("❌ Failed to encode login credentials")
+            return
+        }
         let base64LoginString = loginData.base64EncodedString()
         request.addValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-        
+
         let session = URLSession.shared
         let dataTask = session.uploadTask(with: request, from: imageData) { responseData, response, error in
             if let error = error {
@@ -163,8 +179,7 @@ class TrailblazerNetworkManager: NSObject {
         }
         dataTask.resume()
     }
-    
-    
+
     struct DeviceIdResult {
         let deviceId: TrailblazerDeviceId?
         let error: Error?

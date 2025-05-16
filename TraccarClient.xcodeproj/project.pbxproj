@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		17B41C792DD73FFE009B78EF /* CredentialHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B41C782DD73FF0009B78EF /* CredentialHelper.swift */; };
+		17B41C7B2DD740BB009B78EF /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B41C7A2DD740B5009B78EF /* KeychainHelper.swift */; };
 		5E394EBE28A9CC7600396F33 /* BatteryStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E394EBD28A9CC7600396F33 /* BatteryStatus.swift */; };
 		5E716A271F63A0B100A2DBC3 /* DistanceCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E716A261F63A0B100A2DBC3 /* DistanceCalculator.swift */; };
 		5E716A291F63A45A00A2DBC3 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E716A281F63A45A00A2DBC3 /* RequestManager.swift */; };
@@ -78,6 +80,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		17B41C782DD73FF0009B78EF /* CredentialHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHelper.swift; sourceTree = "<group>"; };
+		17B41C7A2DD740B5009B78EF /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		5E394EBD28A9CC7600396F33 /* BatteryStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryStatus.swift; sourceTree = "<group>"; };
 		5E716A261F63A0B100A2DBC3 /* DistanceCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DistanceCalculator.swift; sourceTree = "<group>"; };
 		5E716A281F63A45A00A2DBC3 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
@@ -245,6 +249,8 @@
 		CED4872117DB1BF6007FCF57 /* TraccarClient */ = {
 			isa = PBXGroup;
 			children = (
+				17B41C7A2DD740B5009B78EF /* KeychainHelper.swift */,
+				17B41C782DD73FF0009B78EF /* CredentialHelper.swift */,
 				73D06D782CE350D100357CF2 /* Settings */,
 				CE5899C71B115C9100ED70D2 /* Images.xcassets */,
 				CED4873317DB1BF6007FCF57 /* MainStoryboard.storyboard */,
@@ -449,12 +455,14 @@
 				CBAA0F7F1F68E807008BBBBE /* MainViewController.swift in Sources */,
 				7338360F2D4BABD8004CB4E7 /* TrailblazerMetadata.swift in Sources */,
 				F0597E412DD189B8003331B2 /* AboutUs.swift in Sources */,
+				17B41C7B2DD740BB009B78EF /* KeychainHelper.swift in Sources */,
 				CB7ED0821F661B4F00A33FCF /* PositionProvider.swift in Sources */,
 				F0597E432DD1CB02003331B2 /* AboutUsViewController.swift in Sources */,
 				CB4197991F67724F008F301C /* NetworkManager.swift in Sources */,
 				CB7ED0841F662BAF00A33FCF /* AppDelegate.swift in Sources */,
 				5E394EBE28A9CC7600396F33 /* BatteryStatus.swift in Sources */,
 				5E716A2B1F63A60800A2DBC3 /* ProtocolFormatter.swift in Sources */,
+				17B41C792DD73FFE009B78EF /* CredentialHelper.swift in Sources */,
 				935B83222D434CAA0087E444 /* TrailblazerPhoto.swift in Sources */,
 				73D06D7B2CE3513000357CF2 /* SettingsViewController.swift in Sources */,
 				CBCE82F21B8D265800A7318B /* TraccarClient.xcdatamodeld in Sources */,

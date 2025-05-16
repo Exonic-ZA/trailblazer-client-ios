@@ -9,34 +9,47 @@
 import UIKit
 
 class Temp: UIViewController {
+
     @IBOutlet weak var overlayView: UIView!
     @IBOutlet weak var disclaimerView: UIView!
-    @IBOutlet weak var disclaimerbodyText: UILabel!
+    @IBOutlet weak var disclaimerBodyText: UILabel!
     @IBOutlet weak var consentButton: UIButton!
-    
-    var showDiscalimer: Bool = true
-     let bodyString = """
-    This app collects and stores your precise location data even when t he app is closed or not in use to enable:
-    - Real-time tracking of delivery vehicles and sales personnel
-    - SOS emergency response functionality
-    - Route optimization and performance analysis \n
-    Your location is only tracked when tracking is manually enabled. The tracking status is always clearly visible in the app.\n
-    Location data is securely stored and used solely for business operations purposes. It is never sold to third parties for marketing.
-    You can disable tracking at any time through the app.
+
+    var showDisclaimer: Bool = true
+    let userDefaults = UserDefaults.standard
+
+    let bodyString = """
+    This app collects and stores your precise location data even when the app is closed or not in use in order to:
+    • Enable real-time tracking of delivery vehicles and sales personnel
+    • Provide SOS emergency response functionality
+    • Optimise routes and analyse performance
+
+    Your location is only tracked when manually enabled. The tracking status is always clearly visible within the app.
+
+    Location data is securely stored and used solely for operational purposes. It is never sold to third parties for marketing.
+
+    You may disable tracking at any time through the app's settings.
     """
-    
+
     override func viewDidLoad() {
-        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        super.viewDidLoad()
+
+        // Check if user has already consented
+        let hasConsented = userDefaults.bool(forKey: "hasConsentedToDisclaimer")
+        overlayView.isHidden = hasConsented
+
+        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.90)
         disclaimerView.layer.cornerRadius = 30
-        consentButton.layer.cornerRadius = 30
-        
-        
-        disclaimerbodyText.text = bodyString
+        consentButton.layer.cornerRadius = 25
+
+        disclaimerBodyText.text = bodyString
+        disclaimerBodyText.textColor = UIColor.label
+        consentButton.setTitleColor(.white, for: .normal)
     }
-    
+
     @IBAction func consentPressed(_ sender: Any) {
-        showDiscalimer = false
+        showDisclaimer = false
         overlayView.isHidden = true
+        userDefaults.set(true, forKey: "hasConsentedToDisclaimer")
     }
 }
-

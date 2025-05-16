@@ -29,22 +29,20 @@
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<false/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs access to use your camera to take photos while on routes.</string>
+	<string>Trailblazer uses your camera to take parcel photos during deliveries. These images are securely uploaded to confirm successful handovers.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This is a tracking application and therefore requires access to location services</string>
+	<string>Trailblazer requires your location at all times to provide continuous tracking and emergency assistance features for delivery personnel.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This is a tracking application and therefore requires access to location services</string>
+	<string>Trailblazer uses your location in the background to support accurate delivery tracking, even when the app is not actively in use.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This is a tracking application and therefore requires access to location services</string>
+	<string>Trailblazer uses your location while the app is active to enable real-time delivery tracking and route optimisation for business operations.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app needs to save route photos to your camera roll.</string>
+	<string>Trailblazer saves parcel images to your device's photo library so you can access and review delivery records locally.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your camera roll to send route photos to the platform.</string>
-	<key>Password</key>
-	<string>Babbling+Stomp+Bottling8+Payroll</string>
+	<string>Trailblazer needs access to your photo library to allow you to upload parcel images for delivery tracking and proof of delivery.</string>
 	<key>UIApplicationShortcutItems</key>
 	<array>
 		<dict>
@@ -97,7 +95,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>Username</key>
-	<string>system@trailblazer.internal</string>
 </dict>
 </plist>
