@@ -25,22 +25,6 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     @IBOutlet weak var uploadLabel: UILabel!
     @IBOutlet weak var activityLoader: UIActivityIndicatorView!
 
-    @IBOutlet weak var overlayView: UIView!
-    @IBOutlet weak var disclaimerView: UIView!
-    @IBOutlet weak var disclaimerbodyText: UILabel!
-    @IBOutlet weak var consentButton: UIButton!
-
-    var showDiscalimer: Bool = true
-    let bodyString = """
-    This app collects and stores your precise location data even when the app is closed or not in use to enable:
-    - Real-time tracking of delivery vehicles and sales personnel
-    - SOS emergency response functionality
-    - Route optimization and performance analysis \n
-    Your location is only tracked when tracking is manually enabled. The tracking status is always clearly visible in the app.\n
-    Location data is securely stored and used solely for business operations purposes. It is never sold to third parties for marketing.
-    You can disable tracking at any time through the app.
-    """
-
     var viewModel: VehicleTrackerViewModel?
     var settingsViewController = SettingsViewController()
     var aboutUsViewController: AboutUsViewController!
@@ -76,6 +60,18 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
 
         setupView()
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        let hasConsented = UserDefaults.standard.bool(forKey: "hasConsentedToDisclaimer")
+        if !hasConsented {
+            if let tempVC = storyboard?.instantiateViewController(withIdentifier: "TempViewController") {
+                tempVC.modalPresentationStyle = .fullScreen
+                present(tempVC, animated: true)
+            }
+        }
+    }
+
 
     func setupView() {
         sosMessage.text = ""
@@ -105,27 +101,11 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         sosGesture.delegate = self
         self.sosButton.addGestureRecognizer(sosGesture)
 
-        overlayView.backgroundColor = UIColor.black.withAlphaComponent(0.90)
-        disclaimerView.layer.cornerRadius = 30
-        consentButton.layer.cornerRadius = 25
-
-        disclaimerbodyText.text = bodyString
-        disclaimerbodyText.textColor = UIColor.label
-        consentButton.setTitleColor(.white, for: .normal)
-
-        let hasConsented = userDefaults.bool(forKey: "hasConsentedToDisclaimer")
-        overlayView.isHidden = hasConsented
-
         photoLocation.desiredAccuracy = kCLLocationAccuracyBest
         photoLocation.requestAlwaysAuthorization()
         photoLocation.startUpdatingLocation()
     }
 
-    @IBAction func consentPressed(_ sender: Any) {
-        showDiscalimer = false
-        overlayView.isHidden = true
-        userDefaults.set(true, forKey: "hasConsentedToDisclaimer")
-    }
     @IBAction func clockInOrOut(_ sender: UIButton) {
         if viewModel?.deviceIdentifier != "" {
             if viewModel?.clockIn == true {

@@ -30,10 +30,19 @@ class MainViewController: IASKAppSettingsViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.settingsObserver = NotificationCenter.default.addObserver(forName: nil, object: nil, queue: nil) { (notification) in
-            self.didChangeSetting(notification)
+
+        let userDefaults = UserDefaults.standard
+        if !userDefaults.bool(forKey: "hasConsentedToDisclaimer") {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "TempViewController")
+            print("✅ TempViewController instantiated: \(vc)")
+            self.present(vc, animated: true)
+        } else {
+            print("✅ User already consented, skipping modal")
         }
     }
+
+
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)

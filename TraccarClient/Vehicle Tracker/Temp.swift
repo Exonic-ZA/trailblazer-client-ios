@@ -28,13 +28,11 @@ class Temp: UIViewController {
 
     Location data is securely stored and used solely for operational purposes. It is never sold to third parties for marketing.
 
-    You may disable tracking at any time through the app's settings.
+    You may end tracking at any time by clocking out or closing the app.
     """
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Check if user has already consented
         let hasConsented = userDefaults.bool(forKey: "hasConsentedToDisclaimer")
         overlayView.isHidden = hasConsented
 
@@ -42,14 +40,23 @@ class Temp: UIViewController {
         disclaimerView.layer.cornerRadius = 30
         consentButton.layer.cornerRadius = 25
 
+        disclaimerView.backgroundColor = UIColor { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? UIColor.systemGray6 : UIColor.white
+        }
+
         disclaimerBodyText.text = bodyString
         disclaimerBodyText.textColor = UIColor.label
+        disclaimerBodyText.numberOfLines = 0
+        disclaimerBodyText.lineBreakMode = .byWordWrapping
+
         consentButton.setTitleColor(.white, for: .normal)
     }
 
-    @IBAction func consentPressed(_ sender: Any) {
-        showDisclaimer = false
-        overlayView.isHidden = true
-        userDefaults.set(true, forKey: "hasConsentedToDisclaimer")
+
+
+    @IBAction func consentPressed(_ sender: UIButton) {
+        UserDefaults.standard.set(true, forKey: "hasConsentedToDisclaimer")
+        self.dismiss(animated: true, completion: nil)
     }
+
 }
