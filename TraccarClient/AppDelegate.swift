@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
     
     var trackingController: TrackingController?
     var positionProvider: PositionProvider?
+    var sosTimer: Timer?
     
     static var instance: AppDelegate {	
         return UIApplication.shared.delegate as! AppDelegate
@@ -62,6 +63,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
             StatusViewController.addMessage(NSLocalizedString("Service created", comment: ""))
             trackingController = TrackingController()
             trackingController?.start()
+        }
+        if UserDefaults.standard.isSosActive {
+            positionProvider = PositionProvider()
+            positionProvider?.delegate = self
+            positionProvider?.startUpdates()
         }
 
         return true
@@ -101,19 +107,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
     
     func didUpdate(position: Position) {
 
+        let userDefaults = UserDefaults.standard
+        
         positionProvider?.stopUpdates()
         positionProvider = nil
 
-        let userDefaults = UserDefaults.standard
-        
-        if let request = ProtocolFormatter.formatPostion(position, url: userDefaults.string(forKey: "server_url_preference")!, alarm: "sos") {
-            RequestManager.sendRequest(request, completionHandler: {(_ success: Bool) -> Void in
-                if success {
-                    self.showToast(message: NSLocalizedString("Send successfully", comment: ""))
-                } else {
-                    self.showToast(message: NSLocalizedString("Send failed", comment: ""))
-                }
-            })
+        if UserDefaults.standard.isSosActive {
+            stopSosLoop()
+            showToast(message: "SOS Deactivated")
+        } else {
+            startSosLoop(position: position)
+            showToast(message: "SOS Activated")
         }
     }
     
@@ -166,6 +170,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate, PositionProviderDelegate 
             userDefaults.removeObject(forKey: "server_port_preference")
             userDefaults.removeObject(forKey: "server_address_preference")
             userDefaults.removeObject(forKey: "secure_preference")
+        }
+    }
+    func startSosLoop(position: Position) {
+        stopSosLoop()
+
+        sendSos(position: position)
+
+        sosTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            self?.sendSos(position: position)
+        }
+
+        UserDefaults.standard.isSosActive = true
+        StatusViewController.addMessage("🚨 SOS alert started")
+    }
+
+    func stopSosLoop() {
+        sosTimer?.invalidate()
+        sosTimer = nil
+        UserDefaults.standard.isSosActive = false
+        StatusViewController.addMessage("🛑 SOS alert stopped")
+    }
+
+    func sendSos(position: Position) {
+        guard let url = UserDefaults.standard.string(forKey: "server_url_preference"),
+              let request = ProtocolFormatter.formatPostion(position, url: url, alarm: "sos") else {
+            return
+        }
+
+        RequestManager.sendRequest(request) { [weak self] success in
+            DispatchQueue.main.async {
+                self?.showToast(message: success ? "SOS sent successfully" : "SOS send failed")
+            }
         }
     }
 

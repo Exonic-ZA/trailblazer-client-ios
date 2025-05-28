@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		175603122DE71B9900B1824B /* UserDefaults+SOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175603112DE71B9600B1824B /* UserDefaults+SOS.swift */; };
+		175603142DE7266600B1824B /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175603132DE7266300B1824B /* Haptics.swift */; };
+		175603162DE7300C00B1824B /* UIViewController+SOSVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175603152DE7300B00B1824B /* UIViewController+SOSVisuals.swift */; };
 		17B41C792DD73FFE009B78EF /* CredentialHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B41C782DD73FF0009B78EF /* CredentialHelper.swift */; };
 		17B41C7B2DD740BB009B78EF /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B41C7A2DD740B5009B78EF /* KeychainHelper.swift */; };
 		5E394EBE28A9CC7600396F33 /* BatteryStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E394EBD28A9CC7600396F33 /* BatteryStatus.swift */; };
@@ -80,6 +83,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		175603112DE71B9600B1824B /* UserDefaults+SOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+SOS.swift"; sourceTree = "<group>"; };
+		175603132DE7266300B1824B /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		175603152DE7300B00B1824B /* UIViewController+SOSVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+SOSVisuals.swift"; sourceTree = "<group>"; };
 		17B41C782DD73FF0009B78EF /* CredentialHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialHelper.swift; sourceTree = "<group>"; };
 		17B41C7A2DD740B5009B78EF /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		5E394EBD28A9CC7600396F33 /* BatteryStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryStatus.swift; sourceTree = "<group>"; };
@@ -207,6 +213,7 @@
 				F0597E3C2DD171D4003331B2 /* Temp.swift */,
 				F0597E402DD189B8003331B2 /* AboutUs.swift */,
 				F0597E422DD1CB02003331B2 /* AboutUsViewController.swift */,
+				175603152DE7300B00B1824B /* UIViewController+SOSVisuals.swift */,
 			);
 			path = "Vehicle Tracker";
 			sourceTree = "<group>";
@@ -249,6 +256,8 @@
 		CED4872117DB1BF6007FCF57 /* TraccarClient */ = {
 			isa = PBXGroup;
 			children = (
+				175603132DE7266300B1824B /* Haptics.swift */,
+				175603112DE71B9600B1824B /* UserDefaults+SOS.swift */,
 				17B41C7A2DD740B5009B78EF /* KeychainHelper.swift */,
 				17B41C782DD73FF0009B78EF /* CredentialHelper.swift */,
 				73D06D782CE350D100357CF2 /* Settings */,
@@ -461,11 +470,13 @@
 				CB4197991F67724F008F301C /* NetworkManager.swift in Sources */,
 				CB7ED0841F662BAF00A33FCF /* AppDelegate.swift in Sources */,
 				5E394EBE28A9CC7600396F33 /* BatteryStatus.swift in Sources */,
+				175603142DE7266600B1824B /* Haptics.swift in Sources */,
 				5E716A2B1F63A60800A2DBC3 /* ProtocolFormatter.swift in Sources */,
 				17B41C792DD73FFE009B78EF /* CredentialHelper.swift in Sources */,
 				935B83222D434CAA0087E444 /* TrailblazerPhoto.swift in Sources */,
 				73D06D7B2CE3513000357CF2 /* SettingsViewController.swift in Sources */,
 				CBCE82F21B8D265800A7318B /* TraccarClient.xcdatamodeld in Sources */,
+				175603162DE7300C00B1824B /* UIViewController+SOSVisuals.swift in Sources */,
 				93F0C4C32CE23FAC00A7D92D /* VehicleTrackerViewController.swift in Sources */,
 				CBAA0F7D1F68E14C008BBBBE /* StatusViewController.swift in Sources */,
 				CBAA0F811F68EB62008BBBBE /* TrackingController.swift in Sources */,
@@ -476,6 +487,7 @@
 				CB4197931F674A3E008F301C /* DatabaseHelper.swift in Sources */,
 				935B831E2D4346C60087E444 /* Enums.swift in Sources */,
 				937274E92D2BCF4F002BA7AE /* PulseAnimation.swift in Sources */,
+				175603122DE71B9900B1824B /* UserDefaults+SOS.swift in Sources */,
 				935B83202D434BA30087E444 /* TrailblazerNetworkManager.swift in Sources */,
 				937966EC2D4CCAD200D65EB2 /* TrailblazerDeviceId.swift in Sources */,
 			);

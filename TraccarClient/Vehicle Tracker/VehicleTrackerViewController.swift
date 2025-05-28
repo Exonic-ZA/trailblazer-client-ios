@@ -30,11 +30,19 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     var aboutUsViewController: AboutUsViewController!
     var imagePicker: UIImagePickerController!
     var photoLocation = CLLocationManager()
+    var sosPressStartTime: Date?
+    var didToggleSos = false
+    var isSosActive: Bool {
+        get { UserDefaults.standard.isSosActive }
+        set { UserDefaults.standard.isSosActive = newValue }
+    }
+    var isSosCooldown = false
 
     var online = false
     var waiting = false
     var stopped = false
-    var sendingSOS = false
+
+
 
     let positionProvider = PositionProvider()
     var locationManager = CLLocationManager()
@@ -70,11 +78,29 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
                 present(tempVC, animated: true)
             }
         }
+        if UserDefaults.standard.isSosActive {
+             let alert = UIAlertController(
+                 title: "SOS Active",
+                 message: "SOS alerts are currently being sent.\nLong-press the SOS button to stop.",
+                 preferredStyle: .alert
+             )
+             alert.addAction(UIAlertAction(title: "Dismiss", style: .default))
+             present(alert, animated: true)
+         }
+    }
+
+    private func clockinTappedByUser() {
+        if isSosActive {
+            promptToResumeOrStopSos()
+        } else {
+            clockin()
+        }
     }
 
 
     func setupView() {
         sosMessage.text = ""
+        sosMessage.alpha = 0
         uploadLabel.text = ""
 
         connectedLabel.layer.borderWidth = 1.5
@@ -97,7 +123,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         takePhoto.layer.cornerRadius = takePhoto.frame.height / 2
 
         let sosGesture = UILongPressGestureRecognizer(target: self, action: #selector(sosPressed))
-        sosGesture.minimumPressDuration = 2.0
+        sosGesture.minimumPressDuration = 1.0
         sosGesture.delegate = self
         self.sosButton.addGestureRecognizer(sosGesture)
 
@@ -111,7 +137,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
             if viewModel?.clockIn == true {
                 clockOut()
             } else {
-                clockin()
+                clockinTappedByUser()
             }
         } else {
             performSegue(withIdentifier: "Settings", sender: self)
@@ -119,67 +145,47 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     }
     
     @IBAction func settingsPressed(_ sender: UIButton) {
-        sosMessage.text = ""
         performSegue(withIdentifier: "Settings", sender: self)
     }
+
+
     
     @IBAction func sosPressed(_ sender: UILongPressGestureRecognizer) {
         guard viewModel?.deviceIdentifier != "" else {
             performSegue(withIdentifier: "Settings", sender: self)
             return
         }
+        guard !isSosCooldown else { return }
 
         switch sender.state {
         case .began:
-            if !sendingSOS {
-                sendingSOS = true
+            sosPressStartTime = Date()
+            didToggleSos = false
+            Haptics.shared.startProgressivePulse()
 
-                self.view.layer.sublayers?.removeAll(where: { $0.name == "pulseLayer" })
+        case .changed:
+            guard let start = sosPressStartTime else { return }
+            let duration = Date().timeIntervalSince(start)
 
-                let labelPulse = PulseAnimation(
-                    numberOfPulses: 1,
-                    radius: 50,
-                    position: connectedLabel.center,
-                    color: .green,
-                    repeatForever: true
-                )
-                labelPulse.animationDuration = 1.0
-                self.view.layer.insertSublayer(labelPulse, below: self.view.layer)
+            if duration >= sender.minimumPressDuration && !didToggleSos {
+                Haptics.shared.stopProgressivePulse()
+                sosPressStartTime = nil
+                didToggleSos = true
 
-                let pulse = PulseAnimation(
-                    numberOfPulses: 1,
-                    radius: 50,
-                    position: sosButton.center,
-                    color: .red,
-                    repeatForever: true
-                )
-                pulse.animationDuration = 1.0
-                self.view.layer.insertSublayer(pulse, below: self.view.layer)
-
-                let generator = UINotificationFeedbackGenerator()
-                generator.notificationOccurred(.warning)
-
-                clockin()
-                connectedLabel.text = viewModel?.sosStatus
+                if isSosActive {
+                    deactivateSos()
+                } else {
+                    activateSos()
+                }
             }
-        
-        case .ended:
-            if sendingSOS {
-                sendingSOS = false
-                connectedLabel.text = viewModel?.connectionText
-                sosMessage.text = viewModel?.sosSent
 
-                self.view.layer.sublayers?
-                    .filter { $0.name == "pulseLayer" }
-                    .forEach { layer in
-                        let fade = CABasicAnimation(keyPath: "opacity")
-                        fade.fromValue = layer.opacity
-                        fade.toValue = 0
-                        fade.duration = 0.3
-                        fade.fillMode = .forwards
-                        fade.isRemovedOnCompletion = false
-                        layer.add(fade, forKey: "fadeOut")
-                    }
+        case .ended, .cancelled, .failed:
+            Haptics.shared.stopProgressivePulse()
+            sosPressStartTime = nil
+
+            if !didToggleSos && !isSosActive {
+                sosMessage.text = "Hold to activate SOS"
+                fadeOutSOSMessage(after: 3.0)
             }
 
         default:
@@ -204,7 +210,7 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         viewModel?.clockIn = true
         online = true
         start()
-        sosMessage.text = ""
+        fadeOutSOSMessage(after: 0.5)
         uploadLabel.text = ""
         connectedLabel.backgroundColor = UIColor(named: "trailblazer-light-background")
         connectedLabel.layer.borderColor = UIColor(named: "trailblazer-light-green")?.cgColor
@@ -217,7 +223,6 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     private func clockOut() {
         viewModel?.clockIn = false
         online = false
-        sendingSOS = false
         uploadLabel.text = ""
         stop()
         connectedLabel.layer.borderColor = UIColor.darkGray.cgColor
@@ -226,6 +231,39 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
         clockInAndOut.setImage(UIImage(systemName: "play.fill"), for: .normal)
         connectedLabel.text = viewModel?.connectionText
         clockInAndOut.setTitle(self.viewModel?.clockInOrOut, for: .normal)
+    }
+    
+    private func promptToResumeOrStopSos() {
+        Haptics.shared.generateUrgentPulse()
+
+        let alert = UIAlertController(
+            title: "Resume SOS Alerts?",
+            message: "You still have SOS alerts active from your last session. Would you like to stop sending alerts or continue?\n\nIgnore this message and SOS alerts will resume in 5 seconds.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Yes, stop alerts", style: .destructive, handler: { _ in
+            self.deactivateSos()
+            self.clockin()
+        }))
+
+        alert.addAction(UIAlertAction(title: "Keep active", style: .default, handler: { _ in
+            self.clockin()
+            self.sosMessage.alpha = 1
+            self.sosMessage.text = "🚨 SOS alerts resumed"
+            self.fadeOutSOSMessage(after: 3.0)
+
+        }))
+
+        present(alert, animated: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            if alert.isBeingPresented {
+                alert.dismiss(animated: true) {
+                    self.clockin()
+                }
+            }
+        }
     }
     
     @IBAction func aboutUsPressed(_ sender: Any) {
@@ -300,11 +338,9 @@ class VehicleTrackerViewController: UIViewController, UIGestureRecognizerDelegat
     func send(_ position: Position) {
         let deviceID = viewModel?.deviceIdentifier?.filter {$0 != " "}.uppercased()
         var url: URL?
-        if sendingSOS {
-            url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, alarm: "sos", deviceId: deviceID)
-        } else {
-            url = ProtocolFormatter.formatPostion(position, url: (viewModel?.serverURL)!, deviceId: deviceID)
-        }
+        let alarmType = isSosActive ? "sos" : nil
+        url = ProtocolFormatter.formatPostion(position, url: viewModel?.serverURL ?? "", alarm: alarmType, deviceId: deviceID)
+        print(isSosActive ? "🚨 Sending SOS alarm location update" : "✅ Sending regular location update")
         print("INFO SENT: \(String(describing: url))")
         if let request = url {
             RequestManager.sendRequest(request, completionHandler: {(_ success: Bool) -> Void in
@@ -392,7 +428,58 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
         sendPhoto(photoInfo, image: image)
     }
     
-    
+    func activateSos() {
+        guard !isSosActive else { return }
+
+        Haptics.shared.stopProgressivePulse()
+
+        isSosActive = true
+        print("🚨 SOS Activated at \(Date())")
+        sosVisualState(active: true)
+
+        sosMessage.alpha = 1
+        sosMessage.text = viewModel?.sosModeActiveText ?? "🚨 SOS Mode Active"
+        Haptics.shared.generateUrgentPulse()
+
+        sosButton.isUserInteractionEnabled = false
+        isSosCooldown = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.sosButton.isUserInteractionEnabled = true
+            self.isSosCooldown = false
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.clockin()
+        }
+
+        fadeOutSOSMessage(after: 5.0)
+    }
+
+    func deactivateSos() {
+        isSosActive = false
+        print("✅ SOS Deactivated at \(Date())")
+        sosVisualState(active: false)
+
+        sosMessage.alpha = 1
+        sosMessage.text = viewModel?.sosModeEndedText ?? "✅ SOS Mode Ended"
+
+        fadeOutSOSMessage(after: 5.0)
+
+        connectedLabel.text = viewModel?.connectionText
+        Haptics.shared.generateSuccess()
+    }
+
+    func fadeOutSOSMessage(after delay: TimeInterval = 5.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            UIView.animate(withDuration: 1.0) {
+                self.sosMessage.alpha = 0
+            } completion: { _ in
+                self.sosMessage.text = ""
+            }
+        }
+    }
+
     
     func sendPhoto(_ photoInfo: TrailblazerPhoto, image: UIImage) {
         self.uploadLabel.text = "Uploading image"
@@ -443,9 +530,7 @@ extension VehicleTrackerViewController: settingsDelegate, PositionProviderDelega
             }
         }
     }
-    
-    
-    
+        
     func ensureImageSize(_ image: UIImage) -> Data? {
         if let compressedData = image.optimizedJPEGData() {
             return compressedData
